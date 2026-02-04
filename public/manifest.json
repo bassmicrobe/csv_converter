@@ -1,0 +1,10 @@
+{
+  "name": "ezcsv - ブラウザで動くCSV編集ツール",
+  "short_name": "ezcsv",
+  "description": "データをサーバーに送らず、ブラウザだけで安全にCSVを編集",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafaf9",
+  "theme_color": "#f59e0b",
+  "lang": "ja"
+}
