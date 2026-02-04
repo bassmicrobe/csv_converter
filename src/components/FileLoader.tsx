@@ -4,11 +4,12 @@ import { useRef, useState } from "react";
 
 interface FileLoaderProps {
   onLoad: (file: File) => Promise<void>;
+  onCreateNew?: () => void;
   loadError: string | null;
   disabled?: boolean;
 }
 
-export function FileLoader({ onLoad, loadError, disabled }: FileLoaderProps) {
+export function FileLoader({ onLoad, onCreateNew, loadError, disabled }: FileLoaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
 
@@ -45,6 +46,14 @@ export function FileLoader({ onLoad, loadError, disabled }: FileLoaderProps) {
           }}
         >
           {loading ? "読み込み中..." : "ファイルを選択"}
+        </button>
+        <button
+          type="button"
+          onClick={onCreateNew}
+          disabled={disabled || !onCreateNew}
+          className="cursor-pointer rounded-lg border border-stone-300 bg-white px-5 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          新たに作成
         </button>
         <span className="text-sm text-stone-500">
           文字コード・区切り文字などは自動判別されます（エクスポート時に変更可能）

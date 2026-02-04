@@ -1,0 +1,387 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import QRCode from "qrcode";
+import JSZip from "jszip";
+
+const MAX_QR = 1000;
+type ErrorCorrectionLevel = "L" | "M" | "Q" | "H";
+
+interface QRGeneratorProps {
+  data: string[][];
+  columnOrder?: number[];
+  hasHeaderRow?: boolean;
+  filteredIndices?: number[] | null;
+  disabled?: boolean;
+  inModal?: boolean;
+}
+
+export function QRGenerator({
+  data,
+  columnOrder,
+  hasHeaderRow = false,
+  filteredIndices = null,
+  disabled,
+  inModal = false,
+}: QRGeneratorProps) {
+  const columnCount = columnOrder?.length ?? data[0]?.length ?? 0;
+  const [selectedColumns, setSelectedColumns] = useState<Set<number>>(new Set([0]));
+  const [size, setSize] = useState(200);
+  const [separator, setSeparator] = useState("\n");
+  const [fgColor, setFgColor] = useState("#000000");
+  const [bgColor, setBgColor] = useState("#ffffff");
+  const [errorCorrection, setErrorCorrection] = useState<ErrorCorrectionLevel>("M");
+  const [generating, setGenerating] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [phase, setPhase] = useState<"qr" | "zip" | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
+
+  const dataRows = useMemo(() => {
+    const start = hasHeaderRow ? 1 : 0;
+    let rows: string[][];
+    if (filteredIndices && filteredIndices.length > 0) {
+      rows = filteredIndices
+        .filter((i) => i >= start && i < data.length)
+        .map((i) => data[i]);
+    } else {
+      rows = data.slice(start);
+    }
+    return rows.slice(0, MAX_QR);
+  }, [data, hasHeaderRow, filteredIndices]);
+
+  const totalRowsBeforeLimit = useMemo(() => {
+    const start = hasHeaderRow ? 1 : 0;
+    if (filteredIndices && filteredIndices.length > 0) {
+      return filteredIndices.filter((i) => i >= start && i < data.length).length;
+    }
+    return data.length - start;
+  }, [data, hasHeaderRow, filteredIndices]);
+
+  const headerLabels = useMemo(() => {
+    if (!hasHeaderRow || !data[0]) return null;
+    return data[0];
+  }, [hasHeaderRow, data]);
+
+  const getRowText = useCallback(
+    (row: string[]) => {
+      const ordered = Array.from(selectedColumns).sort((a, b) => a - b);
+      return ordered
+        .map((displayIdx) => {
+          const actualCol = columnOrder?.[displayIdx] ?? displayIdx;
+          return row[actualCol] ?? "";
+        })
+        .join(separator);
+    },
+    [selectedColumns, columnOrder, separator]
+  );
+
+  const toggleColumn = useCallback((displayIdx: number) => {
+    setSelectedColumns((prev) => {
+      const next = new Set(prev);
+      if (next.has(displayIdx)) {
+        next.delete(displayIdx);
+      } else {
+        next.add(displayIdx);
+      }
+      return next;
+    });
+  }, []);
+
+  const previewText = useMemo(() => {
+    if (dataRows.length === 0) return "";
+    return getRowText(dataRows[0]);
+  }, [dataRows, getRowText]);
+
+  const qrOptions = useMemo(
+    () => ({
+      width: size,
+      margin: 2,
+      color: { dark: fgColor, light: bgColor },
+      type: "image/png" as const,
+      errorCorrectionLevel: errorCorrection,
+    }),
+    [size, fgColor, bgColor, errorCorrection]
+  );
+
+  useEffect(() => {
+    if (selectedColumns.size === 0 || previewText === "") {
+      setPreviewDataUrl(null);
+      setPreviewError(null);
+      return;
+    }
+    setPreviewError(null);
+    QRCode.toDataURL(previewText, {
+      ...qrOptions,
+      width: Math.min(size, 512),
+    })
+      .then(setPreviewDataUrl)
+      .catch((e) => setPreviewError(String(e)));
+  }, [previewText, size, selectedColumns.size, qrOptions]);
+
+  const handleGenerate = useCallback(async () => {
+    if (selectedColumns.size === 0 || dataRows.length === 0) return;
+    setGenerating(true);
+    setProgress(0);
+    setPhase("qr");
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    try {
+      const zip = new JSZip();
+      const total = dataRows.length;
+      let done = 0;
+
+      for (let i = 0; i < total; i++) {
+        const row = dataRows[i];
+        const text = getRowText(row);
+        if (!text.trim()) {
+          done++;
+          setProgress(Math.round((done / total) * 100));
+          continue;
+        }
+        const dataUrl = await QRCode.toDataURL(text, qrOptions);
+        const base64 = dataUrl.replace(/^data:image\/png;base64,/, "");
+        const filename = `qr_${String(i + 1).padStart(String(total).length, "0")}.png`;
+        zip.file(filename, base64, { base64: true });
+        done++;
+        setProgress(Math.round((done / total) * 100));
+      }
+
+      if (total === 1 && dataRows[0]) {
+        const text = getRowText(dataRows[0]);
+        if (text.trim()) {
+          const blob = await QRCode.toDataURL(text, qrOptions);
+          const a = document.createElement("a");
+          a.href = blob;
+          a.download = "qr_01.png";
+          a.click();
+        }
+      } else {
+        setPhase("zip");
+        setProgress(95);
+        await new Promise((r) => requestAnimationFrame(r));
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        const url = URL.createObjectURL(zipBlob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `qr_codes_${new Date().toISOString().slice(0, 10)}.zip`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } finally {
+      setGenerating(false);
+      setProgress(0);
+      setPhase(null);
+    }
+  }, [selectedColumns.size, dataRows, getRowText, qrOptions]);
+
+  if (columnCount === 0) return null;
+
+  const content = (
+    <div className="flex flex-col gap-6">
+        <div>
+          <label className="mb-2 block text-xs font-medium text-stone-600">
+            含める列を選択
+          </label>
+          <div className="flex flex-wrap gap-3">
+            {Array.from({ length: columnCount }).map((_, i) => {
+              const actualCol = columnOrder?.[i] ?? i;
+              const label = headerLabels?.[actualCol];
+              const colLabel = label ? `${label} (Col${i + 1})` : `Col ${i + 1}`;
+              return (
+                <label
+                  key={i}
+                  className="flex cursor-pointer items-center gap-2 rounded-lg border border-stone-200 px-3 py-2 hover:bg-stone-50"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedColumns.has(i)}
+                    onChange={() => toggleColumn(i)}
+                    disabled={disabled}
+                    className="h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                  />
+                  <span className="text-sm text-stone-800">{colLabel}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-end gap-6">
+          <div>
+            <label className="mb-1 block text-xs text-stone-600">サイズ (px)</label>
+            <input
+              type="number"
+              min={100}
+              max={800}
+              step={20}
+              value={size}
+              onChange={(e) => setSize(Math.min(800, Math.max(100, Number(e.target.value) || 200)))}
+              disabled={disabled}
+              className="w-24 cursor-text rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-stone-600">誤り訂正レベル</label>
+            <select
+              value={errorCorrection}
+              onChange={(e) => setErrorCorrection(e.target.value as ErrorCorrectionLevel)}
+              disabled={disabled}
+              className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="L">L（約7%復元可能）</option>
+              <option value="M">M（約15%復元可能）</option>
+              <option value="Q">Q（約25%復元可能）</option>
+              <option value="H">H（約30%復元可能）</option>
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-stone-600">列の区切り文字</label>
+            <select
+              value={separator === "\n" ? "newline" : separator === "\t" ? "tab" : "comma"}
+              onChange={(e) => {
+                const v = e.target.value;
+                setSeparator(v === "newline" ? "\n" : v === "tab" ? "\t" : ",");
+              }}
+              disabled={disabled}
+              className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="newline">改行</option>
+              <option value="tab">タブ</option>
+              <option value="comma">カンマ</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-xs font-medium text-stone-600">
+            色（PNG出力・白黒推奨）
+          </label>
+          <div className="flex flex-wrap items-end gap-4">
+            <div>
+              <label className="mb-1 block text-xs text-stone-500">前景（モジュール色）</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={fgColor}
+                  onChange={(e) => setFgColor(e.target.value)}
+                  disabled={disabled}
+                  className="h-9 w-14 cursor-pointer rounded border border-stone-300 bg-white p-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                <input
+                  type="text"
+                  value={fgColor}
+                  onChange={(e) => setFgColor(e.target.value)}
+                  disabled={disabled}
+                  className="w-20 cursor-text rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-xs text-stone-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-stone-500">背景</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={bgColor}
+                  onChange={(e) => setBgColor(e.target.value)}
+                  disabled={disabled}
+                  className="h-9 w-14 cursor-pointer rounded border border-stone-300 bg-white p-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                <input
+                  type="text"
+                  value={bgColor}
+                  onChange={(e) => setBgColor(e.target.value)}
+                  disabled={disabled}
+                  className="w-20 cursor-text rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-xs text-stone-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {totalRowsBeforeLimit > MAX_QR && (
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            対象が{totalRowsBeforeLimit.toLocaleString()}件のため、先頭{MAX_QR.toLocaleString()}件のみ生成します。
+          </p>
+        )}
+
+        <div>
+          <label className="mb-2 block text-xs font-medium text-stone-600">
+            プレビュー（1行目のみ）
+          </label>
+          <div className="flex flex-wrap items-start gap-4">
+            <div className="flex flex-col items-center gap-2 rounded-lg border border-stone-200 bg-stone-50/50 p-4">
+              {previewError ? (
+                <p className="text-sm text-red-600">{previewError}</p>
+              ) : previewDataUrl ? (
+                <>
+                  <img
+                    src={previewDataUrl}
+                    alt="QRプレビュー"
+                    className="max-w-[200px] border border-stone-200"
+                    style={{ width: Math.min(size, 200), height: Math.min(size, 200) }}
+                  />
+                  <span className="text-xs text-stone-500">
+                    {size}×{size}px で出力
+                  </span>
+                </>
+              ) : (
+                <p className="text-sm text-stone-500">
+                  {selectedColumns.size === 0
+                    ? "列を1つ以上選択してください"
+                    : "データがありません"}
+                </p>
+              )}
+            </div>
+            {previewText && (
+              <div className="max-w-md rounded-lg border border-stone-200 bg-white p-3">
+                <p className="mb-1 text-xs font-medium text-stone-500">プレビュー対象テキスト</p>
+                <pre className="max-h-24 overflow-auto whitespace-pre-wrap break-all text-xs text-stone-700">
+                  {previewText || "（空）"}
+                </pre>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {generating && (
+          <div>
+            <div className="mb-1 flex justify-between text-xs text-stone-600">
+              <span>{phase === "zip" ? "ZIP作成中..." : "QR生成中..."}</span>
+              <span>{progress}%</span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200">
+              <div
+                className="h-full rounded-full bg-amber-500 transition-all duration-150"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={handleGenerate}
+          disabled={
+            disabled ||
+            selectedColumns.size === 0 ||
+            dataRows.length === 0 ||
+            generating
+          }
+          className="cursor-pointer self-start rounded-lg bg-amber-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {generating ? "生成中..." : dataRows.length > 1 ? "ZIPでダウンロード" : "PNGでダウンロード"}
+        </button>
+    </div>
+  );
+
+  if (inModal) return content;
+
+  return (
+    <section className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-amber-700">
+        QRコード生成
+      </h2>
+      {content}
+    </section>
+  );
+}

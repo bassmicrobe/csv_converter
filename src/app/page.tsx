@@ -5,6 +5,8 @@ import { FileLoader } from "@/components/FileLoader";
 import { SearchFilter } from "@/components/SearchFilter";
 import { CsvTable } from "@/components/CsvTable";
 import { ExportPanel } from "@/components/ExportPanel";
+import { Modal } from "@/components/Modal";
+import { QRGenerator } from "@/components/QRGenerator";
 import { useCsvEditor } from "@/hooks/useCsvEditor";
 
 export default function Home() {
@@ -20,6 +22,7 @@ export default function Home() {
     deleteColumn,
     reorderColumns,
     setExportOptions,
+    createNew,
     loadError,
     columnCount,
     rowCount,
@@ -30,6 +33,7 @@ export default function Home() {
   const [hasHeaderRow, setHasHeaderRow] = useState(false);
   const [sortColumn, setSortColumn] = useState<number | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(null);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
 
   const handleFilterChange = useCallback(
     (indices: number[] | null, column: number | null) => {
@@ -66,6 +70,14 @@ export default function Home() {
       <div className="space-y-6">
         <FileLoader
           onLoad={loadFile}
+          onCreateNew={() => {
+            createNew(1, 4);
+            setHasHeaderRow(false);
+            setFilteredIndices(null);
+            setSearchColumn(null);
+            setSortColumn(null);
+            setSortDirection(null);
+          }}
           loadError={loadError}
           disabled={false}
         />
@@ -140,6 +152,32 @@ export default function Home() {
               onOptionsChange={setExportOptions}
               disabled={!hasData}
             />
+
+            <div>
+              <button
+                type="button"
+                onClick={() => setQrModalOpen(true)}
+                disabled={!hasData}
+                className="cursor-pointer rounded-lg border border-stone-300 bg-white px-5 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                QRコード生成
+              </button>
+            </div>
+
+            <Modal
+              isOpen={qrModalOpen}
+              onClose={() => setQrModalOpen(false)}
+              title="QRコード生成"
+            >
+              <QRGenerator
+                data={data}
+                columnOrder={columnOrder}
+                hasHeaderRow={hasHeaderRow}
+                filteredIndices={filteredIndices}
+                disabled={!hasData}
+                inModal
+              />
+            </Modal>
           </>
         )}
       </div>

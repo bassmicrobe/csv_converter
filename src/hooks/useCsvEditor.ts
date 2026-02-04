@@ -109,6 +109,21 @@ export function useCsvEditor() {
     setColumnOrder([]);
   }, []);
 
+  const createNew = useCallback((rows = 1, cols = 4) => {
+    setLoadError(null);
+    const newData = Array.from({ length: rows }, () =>
+      Array.from({ length: cols }, () => "")
+    );
+    setData(newData);
+    setOptions({
+      charset: "UTF-8",
+      delimiter: ",",
+      quoteChar: '"',
+      lineEnding: "LF",
+    });
+    setColumnOrder(Array.from({ length: cols }, (_, i) => i));
+  }, []);
+
   const columnCount = data[0]?.length ?? 0;
 
   return {
@@ -124,6 +139,7 @@ export function useCsvEditor() {
     reorderColumns,
     setExportOptions,
     clearData,
+    createNew,
     loadError,
     columnCount,
     rowCount: data.length,
