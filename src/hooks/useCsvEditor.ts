@@ -28,7 +28,9 @@ export function useCsvEditor() {
       });
 
       if (result.error) {
-        setLoadError(result.error);
+        setLoadError(
+          result.errorDetail ? `構文エラー\n${result.error}` : result.error
+        );
         return;
       }
 
@@ -44,9 +46,8 @@ export function useCsvEditor() {
       const cols = result.data[0]?.length ?? 0;
       setColumnOrder(Array.from({ length: cols }, (_, i) => i));
     } catch (err) {
-      setLoadError(
-        err instanceof Error ? err.message : "ファイルの読み込みに失敗しました"
-      );
+      const msg = err instanceof Error ? err.message : "ファイルの読み込みに失敗しました";
+      setLoadError(msg.includes("\n") ? `読み込みエラー\n${msg}` : msg);
     }
   }, []);
 

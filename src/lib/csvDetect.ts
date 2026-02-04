@@ -14,10 +14,20 @@ export async function detectAndReadCsv(file: File): Promise<DetectResult> {
   const buffer = new Uint8Array(arrayBuffer);
 
   const charset = detectCharset(buffer);
-  const text =
-    charset === "Shift_JIS"
-      ? iconv.decode(buffer as Buffer, "shiftjis")
-      : new TextDecoder("utf-8").decode(buffer);
+  let text: string;
+  try {
+    text =
+      charset === "Shift_JIS"
+        ? iconv.decode(buffer as Buffer, "shiftjis")
+        : new TextDecoder("utf-8").decode(buffer);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(
+      `文字コードの解釈に失敗しました（${charset} として判定）。\n` +
+        `別の文字コードで保存し直すか、UTF-8（BOM あり）で保存してください。\n` +
+        `詳細: ${msg}`
+    );
+  }
 
   const lineEnding = detectLineEnding(buffer);
   const delimiter = detectDelimiter(text);

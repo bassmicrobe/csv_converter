@@ -60,9 +60,12 @@ export function FileLoader({ onLoad, onCreateNew, loadError, disabled }: FileLoa
         </span>
       </div>
       {loadError && (
-        <p className="mt-3 text-sm text-red-600" role="alert">
-          {loadError}
-        </p>
+        <div
+          className="mt-3 rounded-lg border border-red-200 bg-red-50 p-4"
+          role="alert"
+        >
+          <p className="whitespace-pre-line text-sm text-red-800">{loadError}</p>
+        </div>
       )}
     </section>
   );
