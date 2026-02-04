@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { JsonLd } from "@/components/JsonLd";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { ToastProvider } from "@/components/Toast";
 import "./globals.css";
 
 const siteUrl = "https://ezcsv.com";
@@ -10,22 +11,23 @@ const siteUrl = "https://ezcsv.com";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "ezcsv | ブラウザで動くCSV編集ツール - データ送信なしで安全に編集",
+    default: "ezcsv | 無料のCSV編集ツール - オンラインでブラウザ完結・データ送信なし",
     template: "%s | ezcsv",
   },
   description:
-    "ezcsvはブラウザだけで動くCSV編集ツール。データをサーバーに送らず、秘匿情報・個人情報を安全に編集できます。UTF-8/Shift_JIS対応、最大5万行、仮想スクロール。",
+    "ezcsvは無料のオンラインCSV編集ツール。ブラウザだけでCSV・TSVを編集・変換。データはサーバーに送信されず完全にローカルで動作。UTF-8/Shift_JIS対応、5万行まで、PDF/QRコード出力も可能。",
   keywords: [
-    "CSV",
-    "CSV編集",
-    "CSVエディタ",
-    "エクセル",
+    "CSV 編集",
+    "CSV エディタ",
+    "CSV 編集 オンライン",
+    "CSV エディタ 無料",
+    "オンライン CSV 編集",
+    "CSV 変換",
+    "TSV 編集",
+    "Excel CSV",
     "データ編集",
-    "ブラウザ",
-    "セキュリティ",
-    "個人情報",
-    "UTF-8",
-    "Shift_JIS",
+    "ブラウザ CSV",
+    "個人情報 安全",
   ],
   authors: [{ name: "ezcsv" }],
   creator: "ezcsv",
@@ -40,14 +42,14 @@ export const metadata: Metadata = {
     locale: "ja_JP",
     url: siteUrl,
     siteName: "ezcsv",
-    title: "ezcsv | ブラウザで動くCSV編集ツール - データ送信なしで安全に編集",
+    title: "ezcsv | 無料のCSV編集ツール - オンラインでブラウザ完結",
     description:
-      "ブラウザだけで動くCSV編集ツール。データをサーバーに送らず、秘匿情報を安全に編集。UTF-8/Shift_JIS対応。",
+      "無料のオンラインCSV編集ツール。ブラウザだけでCSV・TSVを編集。データ送信なし・UTF-8/Shift_JIS対応・5万行まで。",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ezcsv | ブラウザで動くCSV編集ツール",
-    description: "データをサーバーに送らず、ブラウザだけで安全にCSVを編集",
+    title: "ezcsv | 無料のCSV編集ツール",
+    description: "ブラウザだけでCSVを編集。データ送信なし・無料。",
   },
   robots: {
     index: true,
@@ -92,12 +94,14 @@ export default function RootLayout({
         <JsonLd />
       </head>
       <body className="antialiased bg-stone-50 text-stone-900 min-h-screen">
+        <ToastProvider>
         <div className="flex min-h-screen flex-col">
           <SiteHeader />
           <div className="flex-1">{children}</div>
           <SiteFooter />
           <Analytics />
         </div>
+        </ToastProvider>
       </body>
     </html>
   );

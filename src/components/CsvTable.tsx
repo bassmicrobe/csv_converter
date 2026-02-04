@@ -2,11 +2,14 @@
 
 import { useRef, useCallback, useMemo, useState, useEffect } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { useToast } from "@/components/Toast";
 import type { CsvOptions } from "@/lib/types";
 
 const ROW_HEIGHT = 36;
 const HEADER_HEIGHT = 40;
 const COL_WIDTH = 120;
+const COL_MIN_WIDTH = 60;
+const COL_MAX_WIDTH = 400;
 
 export type SortDirection = "asc" | "desc" | null;
 
@@ -23,12 +26,14 @@ interface CsvTableProps {
   onAddColumn?: () => void;
   onDeleteRow?: (rowIndex: number) => void;
   onDeleteColumn?: (displayColIndex: number) => void;
+  onClearRow?: (rowIndex: number) => void;
+  onClearColumn?: (displayColIndex: number) => void;
   options: CsvOptions;
   searchColumn: number | null;
   onUpdateCell: (rowIndex: number, colIndex: number, value: string) => void;
 }
 
-const ROW_ACTION_WIDTH = 56;
+const ROW_ACTION_WIDTH = 72;
 
 export function CsvTable({
   data,
@@ -43,11 +48,64 @@ export function CsvTable({
   onAddColumn,
   onDeleteRow,
   onDeleteColumn,
+  onClearRow,
+  onClearColumn,
   options,
   searchColumn,
   onUpdateCell,
 }: CsvTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
+  const toast = useToast();
+  const [columnWidths, setColumnWidths] = useState<Record<number, number>>({});
+  const [resizingCol, setResizingCol] = useState<number | null>(null);
+  const resizeStartX = useRef(0);
+  const resizeStartWidth = useRef(0);
+
+  const getColumnWidth = useCallback(
+    (displayColIndex: number) => {
+      const actualCol = columnOrder[displayColIndex];
+      return (actualCol != null && columnWidths[actualCol] != null)
+        ? columnWidths[actualCol]
+        : COL_WIDTH;
+    },
+    [columnOrder, columnWidths]
+  );
+
+  const handleResizeStart = useCallback(
+    (displayColIndex: number, e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setResizingCol(displayColIndex);
+      resizeStartX.current = e.clientX;
+      resizeStartWidth.current = getColumnWidth(displayColIndex);
+    },
+    [getColumnWidth]
+  );
+
+  useEffect(() => {
+    if (resizingCol == null) return;
+    const actualCol = columnOrder[resizingCol];
+    if (actualCol == null) return;
+    const onMove = (e: MouseEvent) => {
+      const delta = e.clientX - resizeStartX.current;
+      const newWidth = Math.min(
+        COL_MAX_WIDTH,
+        Math.max(COL_MIN_WIDTH, resizeStartWidth.current + delta)
+      );
+      setColumnWidths((prev) => ({ ...prev, [actualCol]: newWidth }));
+    };
+    const onUp = () => setResizingCol(null);
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    return () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [resizingCol, columnOrder]);
 
   const dataRowIndices = useMemo(() => {
     const start = hasHeaderRow ? 1 : 0;
@@ -149,9 +207,11 @@ export function CsvTable({
 
   const virtualRows = rowVirtualizer.getVirtualItems();
 
-  const hasRowActions = onAddRow != null || onDeleteRow != null;
-  const hasColActions = onDeleteColumn != null;
-  const tableMinWidth = (hasRowActions ? ROW_ACTION_WIDTH : 0) + colCount * COL_WIDTH;
+  const hasRowActions = onAddRow != null || onDeleteRow != null || onClearRow != null;
+  const hasColActions = onDeleteColumn != null || onClearColumn != null;
+  const tableMinWidth =
+    (hasRowActions ? ROW_ACTION_WIDTH : 0) +
+    columnOrder.reduce((sum, _, i) => sum + getColumnWidth(i), 0);
 
   return (
     <div
@@ -192,13 +252,14 @@ export function CsvTable({
               ? `${headerRow[actualColIndex]}${searchColumn === displayColIndex ? " (絞込)" : ""}`
               : `Col ${displayColIndex + 1}${searchColumn === displayColIndex ? " (絞込)" : ""}`;
             const isSorted = sortColumn === displayColIndex;
+            const w = getColumnWidth(displayColIndex);
             return (
               <div
                 key={displayColIndex}
                 onDragOver={handleColumnDragOver}
                 onDrop={(e) => handleColumnDrop(e, displayColIndex)}
-                className="flex shrink-0 items-center gap-0.5 border-r border-stone-200 last:border-r-0"
-                style={{ width: COL_WIDTH }}
+                className="group/col relative flex shrink-0 items-center gap-0.5 border-r border-stone-200 last:border-r-0"
+                style={{ width: w }}
               >
                 {onColumnOrderChange && (
                   <span
@@ -228,18 +289,44 @@ export function CsvTable({
                   )}
                 </button>
                 {hasColActions && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteColumn?.(displayColIndex);
-                    }}
-                    className="cursor-pointer shrink-0 rounded p-1 text-stone-400 hover:bg-red-100 hover:text-red-600"
-                    title={`列 ${displayColIndex + 1} を削除`}
-                  >
-                    ×
-                  </button>
+                  <div className="flex shrink-0 gap-0.5">
+                    {onClearColumn && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onClearColumn(displayColIndex);
+                          toast?.show("列の内容を空にしました");
+                        }}
+                        className="cursor-pointer rounded p-1 text-stone-400 hover:bg-amber-100 hover:text-amber-600"
+                        title={`列 ${displayColIndex + 1} の内容を空にする`}
+                      >
+                        ⌫
+                      </button>
+                    )}
+                    {onDeleteColumn && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteColumn(displayColIndex);
+                          toast?.show("列を削除しました");
+                        }}
+                        className="cursor-pointer rounded p-1 text-stone-400 hover:bg-red-100 hover:text-red-600"
+                        title={`列 ${displayColIndex + 1} を削除`}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
                 )}
+                <div
+                  onMouseDown={(e) => handleResizeStart(displayColIndex, e)}
+                  className="absolute -right-1 top-0 z-20 h-full w-3 cursor-col-resize"
+                  title="ドラッグで列の幅を変更"
+                  role="separator"
+                  aria-orientation="vertical"
+                />
               </div>
             );
           })}
@@ -276,10 +363,26 @@ export function CsvTable({
                   <span className="text-xs text-stone-400">
                     {actualRowIndex + 1}
                   </span>
+                  {onClearRow && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClearRow(actualRowIndex);
+                        toast?.show("行の内容を空にしました");
+                      }}
+                      className="cursor-pointer rounded p-0.5 text-stone-400 opacity-0 group-hover:opacity-100 hover:bg-amber-100 hover:text-amber-600"
+                      title={`行 ${actualRowIndex + 1} の内容を空にする`}
+                    >
+                      ⌫
+                    </button>
+                  )}
                   {onDeleteRow && (
                     <button
                       type="button"
-                      onClick={() => onDeleteRow(actualRowIndex)}
+                      onClick={() => {
+                        onDeleteRow(actualRowIndex);
+                        toast?.show("行を削除しました");
+                      }}
                       className="cursor-pointer rounded p-0.5 text-stone-400 opacity-0 group-hover:opacity-100 hover:bg-red-100 hover:text-red-600"
                       title={`行 ${actualRowIndex + 1} を削除`}
                     >
@@ -295,7 +398,8 @@ export function CsvTable({
                   onBlur={(value) =>
                     handleCellChange(virtualRow.index, displayColIndex, value)
                   }
-                  width={COL_WIDTH}
+                  onEditComplete={() => toast?.show("編集しました")}
+                  width={getColumnWidth(displayColIndex)}
                 />
               ))}
             </div>
@@ -309,10 +413,12 @@ export function CsvTable({
 function EditableCell({
   value,
   onBlur,
+  onEditComplete,
   width,
 }: {
   value: string;
   onBlur: (value: string) => void;
+  onEditComplete?: () => void;
   width: number;
 }) {
   const [local, setLocal] = useState(value);
@@ -324,7 +430,10 @@ function EditableCell({
 
   const handleBlur = () => {
     setEditing(false);
-    if (local !== value) onBlur(local);
+    if (local !== value) {
+      onBlur(local);
+      onEditComplete?.();
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

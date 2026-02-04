@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { FileLoader } from "@/components/FileLoader";
 import { SearchFilter } from "@/components/SearchFilter";
 import { CsvTable } from "@/components/CsvTable";
 import { ExportPanel } from "@/components/ExportPanel";
 import { Modal } from "@/components/Modal";
 import { QRGenerator } from "@/components/QRGenerator";
+import { useToast } from "@/components/Toast";
 import { useCsvEditor } from "@/hooks/useCsvEditor";
 
 export default function Home() {
@@ -20,13 +21,42 @@ export default function Home() {
     addColumn,
     deleteRow,
     deleteColumn,
+    clearRow,
+    clearColumn,
     reorderColumns,
     setExportOptions,
     createNew,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
     loadError,
     columnCount,
     rowCount,
   } = useCsvEditor();
+
+  const toast = useToast();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "z") {
+        e.preventDefault();
+        if (e.shiftKey) {
+          if (canRedo) {
+            redo();
+            toast?.show("やり直しました");
+          }
+        } else {
+          if (canUndo) {
+            undo();
+            toast?.show("元に戻しました");
+          }
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [canUndo, canRedo, undo, redo, toast]);
 
   const [filteredIndices, setFilteredIndices] = useState<number[] | null>(null);
   const [searchColumn, setSearchColumn] = useState<number | null>(null);
@@ -55,7 +85,7 @@ export default function Home() {
           ezcsv
         </h1>
         <p className="mt-1 text-stone-600">
-          ブラウザだけで動くCSV編集ツール
+          無料のオンラインCSV編集ツール - ブラウザだけで安全に編集
         </p>
         <div className="mt-4 rounded-lg border-2 border-emerald-500/60 bg-emerald-50 px-4 py-3">
           <p className="text-lg font-bold text-emerald-700">
@@ -112,7 +142,7 @@ export default function Home() {
               disabled={false}
             />
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
               <p className="text-sm text-stone-600">
                 {(hasHeaderRow ? Math.max(0, rowCount - 1) : rowCount).toLocaleString()} 行（データ）
                 × {columnCount} 列
@@ -122,6 +152,32 @@ export default function Home() {
                   </span>
                 )}
               </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    undo();
+                    toast?.show("元に戻しました");
+                  }}
+                  disabled={!canUndo}
+                  className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  title="元に戻す (Ctrl+Z)"
+                >
+                  元に戻す
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    redo();
+                    toast?.show("やり直しました");
+                  }}
+                  disabled={!canRedo}
+                  className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  title="やり直す (Ctrl+Shift+Z)"
+                >
+                  やり直す
+                </button>
+              </div>
             </div>
 
             <CsvTable
@@ -140,6 +196,8 @@ export default function Home() {
               onAddColumn={addColumn}
               onDeleteRow={deleteRow}
               onDeleteColumn={deleteColumn}
+              onClearRow={clearRow}
+              onClearColumn={clearColumn}
               options={options}
               searchColumn={searchColumn}
               onUpdateCell={updateCell}
@@ -180,6 +238,34 @@ export default function Home() {
             </Modal>
           </>
         )}
+
+        <section className="mt-12 rounded-xl border border-stone-200 bg-white p-6" aria-labelledby="about-heading">
+          <h2 id="about-heading" className="mb-4 text-lg font-semibold text-stone-900">
+            ezcsvとは
+          </h2>
+          <p className="mb-4 text-stone-600">
+            ezcsvは無料のオンラインCSV編集ツールです。ブラウザ上でCSV・TSVファイルを編集・変換でき、インストール不要で即座に利用できます。データは一切サーバーに送信されず、すべてブラウザ内で処理されるため、個人情報や機密データも安全に編集できます。UTF-8/Shift_JIS対応、最大5万行まで、検索・ソート・列の並び替え・PDF出力・QRコード生成などの機能を備えています。
+          </p>
+          <h3 className="mb-2 text-base font-medium text-stone-800">よくある質問</h3>
+          <dl className="space-y-4">
+            <div>
+              <dt className="font-medium text-stone-800">ezcsvは無料で使えますか？</dt>
+              <dd className="mt-1 text-sm text-stone-600">はい、完全無料です。登録やログインは不要です。</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-stone-800">CSVデータはサーバーに送信されますか？</dt>
+              <dd className="mt-1 text-sm text-stone-600">いいえ、すべての処理はブラウザ内で完結します。データは外部に送信されません。</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-stone-800">どのような形式のCSVに対応していますか？</dt>
+              <dd className="mt-1 text-sm text-stone-600">UTF-8・Shift_JIS、カンマ・タブ区切り、LF/CRLF改行に対応しています。読み込み時に自動判別されます。</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-stone-800">Excelで開けるCSVを出力できますか？</dt>
+              <dd className="mt-1 text-sm text-stone-600">はい、UTF-8またはShift_JISでエクスポートできます。Excelで開く場合はShift_JISを選択してください。</dd>
+            </div>
+          </dl>
+        </section>
       </div>
 
     </main>

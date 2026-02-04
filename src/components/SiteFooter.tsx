@@ -43,8 +43,33 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-stone-200 pt-8 md:flex-row">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <Link href="/terms" className="text-sm text-stone-500 hover:text-amber-600">
+              利用規約
+            </Link>
+            <Link href="/privacy" className="text-sm text-stone-500 hover:text-amber-600">
+              プライバシーポリシー
+            </Link>
+            <a
+              href="https://www.cybereye-tech.jp/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-stone-500 hover:text-amber-600"
+            >
+              運営会社
+            </a>
+          </div>
           <p className="text-sm text-stone-500">
-            © {currentYear} ezcsv.com — 秘匿情報・個人情報を含むCSVを安全に編集（
+            © {currentYear}{" "}
+            <a
+              href="https://www.cybereye-tech.jp/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-amber-600"
+            >
+              サイバーアイ・テクノロジー株式会社
+            </a>{" "}
+            — ezcsv 秘匿情報・個人情報を含むCSVを安全に編集（
             <strong>データはサーバーに送信されません</strong>
             ）
           </p>
