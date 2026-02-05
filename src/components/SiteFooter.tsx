@@ -44,6 +44,9 @@ export function SiteFooter() {
         </div>
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-stone-200 pt-8 md:flex-row">
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <Link href="/contact" className="text-sm text-stone-500 hover:text-amber-600">
+              お問い合わせ
+            </Link>
             <Link href="/terms" className="text-sm text-stone-500 hover:text-amber-600">
               利用規約
             </Link>

@@ -77,9 +77,11 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-lg font-semibold text-stone-900">7. お問い合わせ</h2>
           <p className="mt-2 leading-relaxed">
-            プライバシーに関するお問い合わせは、運営会社のお問い合わせ窓口までご連絡ください。
-          </p>
-          <p className="mt-2 leading-relaxed">
+            プライバシーに関するお問い合わせは、
+            <Link href="/contact" className="text-amber-600 hover:text-amber-700">
+              お問い合わせフォーム
+            </Link>
+            または運営会社（
             <a
               href="https://www.cybereye-tech.jp/"
               target="_blank"
@@ -88,6 +90,7 @@ export default function PrivacyPage() {
             >
               サイバーアイ・テクノロジー株式会社
             </a>
+            ）までご連絡ください。
           </p>
         </section>
       </div>
