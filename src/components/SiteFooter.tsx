@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CookieSettingsLink } from "@/components/CookieConsent";
 
 export function SiteFooter() {
   const currentYear = new Date().getFullYear();
@@ -53,6 +54,7 @@ export function SiteFooter() {
             <Link href="/privacy" className="text-sm text-stone-500 hover:text-amber-600">
               プライバシーポリシー
             </Link>
+            <CookieSettingsLink />
             <a
               href="https://www.cybereye-tech.jp/"
               target="_blank"

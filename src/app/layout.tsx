@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Analytics } from "@vercel/analytics/next";
+import { CookieConsentProvider } from "@/components/CookieConsent";
 import { JsonLd } from "@/components/JsonLd";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -95,12 +95,13 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-stone-50 text-stone-900 min-h-screen">
         <ToastProvider>
+        <CookieConsentProvider>
         <div className="flex min-h-screen flex-col">
           <SiteHeader />
           <div className="flex-1">{children}</div>
           <SiteFooter />
-          <Analytics />
         </div>
+        </CookieConsentProvider>
         </ToastProvider>
       </body>
     </html>

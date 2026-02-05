@@ -37,18 +37,29 @@ export function ContactForm() {
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!scriptReady || !TURNSTILE_SITE_KEY || !turnstileContainerRef.current) return;
+    if (!scriptReady || !TURNSTILE_SITE_KEY) return;
     const t = window.turnstile;
     if (!t) return;
 
-    t.ready(() => {
-      turnstileWidgetId.current = t.render("#turnstile-container", {
-        sitekey: TURNSTILE_SITE_KEY,
-        theme: "light",
-        size: "normal",
-        callback: () => setTurnstileReady(true),
+    const container = document.getElementById("turnstile-container");
+    if (!container) return;
+
+    try {
+      t.ready(() => {
+        try {
+          turnstileWidgetId.current = t.render("#turnstile-container", {
+            sitekey: TURNSTILE_SITE_KEY,
+            theme: "light",
+            size: "normal",
+            callback: () => setTurnstileReady(true),
+          });
+        } catch {
+          setTurnstileReady(true);
+        }
       });
-    });
+    } catch {
+      setTurnstileReady(true);
+    }
     return () => {
       turnstileWidgetId.current = null;
     };
@@ -225,7 +236,7 @@ export function ContactForm() {
       )}
 
       {TURNSTILE_SITE_KEY && (
-        <div ref={turnstileContainerRef} id="turnstile-container" className="[&_iframe]:max-w-full" />
+        <div ref={turnstileContainerRef} id="turnstile-container" />
       )}
 
       <div>
