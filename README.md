@@ -19,10 +19,11 @@ npm run dev
 
 ## Basic認証（オプション）
 
-環境変数 `BASIC_AUTH_USER` と `BASIC_AUTH_PASSWORD` を両方設定すると、全ページに Basic 認証がかかります。未設定の場合は認証なしで動作します。
+環境変数 `BASIC_AUTH_USER` と `BASIC_AUTH_PASSWORD` を両方設定すると、全ページに Basic 認証がかかります。`BASIC_AUTH_ENABLED=false` または `0` で認証を無効化できます（認証情報は残したまま OFF にできる）。
 
 ```bash
 # .env.local に設定（本番・Vercel では Project Settings > Environment Variables）
+BASIC_AUTH_ENABLED=true   # false または 0 で認証オフ
 BASIC_AUTH_USER=your_username
 BASIC_AUTH_PASSWORD=your_password
 ```

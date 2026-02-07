@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
+  const enabled = process.env.BASIC_AUTH_ENABLED;
+  if (enabled === "false" || enabled === "0") {
+    return NextResponse.next();
+  }
+
   const user = process.env.BASIC_AUTH_USER;
   const pass = process.env.BASIC_AUTH_PASSWORD;
 
-  // 環境変数が未設定の場合は認証をスキップ（開発時用）
+  // USER と PASSWORD が未設定の場合は認証をスキップ
   if (!user || !pass) {
     return NextResponse.next();
   }
