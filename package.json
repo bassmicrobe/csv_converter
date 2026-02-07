@@ -9,6 +9,7 @@
     "lint": "echo 'Run npm run build to verify'"
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.985.0",
     "@tanstack/react-virtual": "^3.13.0",
     "@vercel/analytics": "^1.6.1",
     "html2pdf.js": "^0.14.0",

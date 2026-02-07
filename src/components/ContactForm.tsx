@@ -3,10 +3,6 @@
 import Script from "next/script";
 import { useState } from "react";
 
-const FORMSPREE_ENDPOINT = process.env.NEXT_PUBLIC_FORMSPREE_FORM_ID
-  ? `https://formspree.io/f/${process.env.NEXT_PUBLIC_FORMSPREE_FORM_ID}`
-  : null;
-
 // Cloudflare テストキー（未設定時のフォールバック）
 const TURNSTILE_TEST_KEY = "1x00000000000000000000AA";
 const TURNSTILE_SITE_KEY =
@@ -19,7 +15,6 @@ export function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!FORMSPREE_ENDPOINT) return;
 
     const form = e.currentTarget;
     const formData = new FormData(form);
@@ -29,10 +24,9 @@ export function ContactForm() {
     setErrorMessage("");
 
     try {
-      const res = await fetch(FORMSPREE_ENDPOINT, {
+      const res = await fetch("/api/contact", {
         method: "POST",
         body: formData,
-        headers: { Accept: "application/json" },
       });
 
       if (res.ok) {
@@ -50,8 +44,8 @@ export function ContactForm() {
     }
   };
 
-  // Formspree が未設定の場合はフォールバック表示
-  if (!FORMSPREE_ENDPOINT) {
+  // AWS SES が未設定の場合はフォールバック表示（開発時のみ）
+  if (process.env.NODE_ENV === "development" && !process.env.SES_FROM_EMAIL) {
     return (
       <div className="rounded-lg border border-amber-200 bg-amber-50 p-6">
         <p className="text-stone-700">
@@ -68,22 +62,17 @@ export function ContactForm() {
           </a>
         </div>
         <p className="mt-4 text-sm text-stone-500">
-          フォームから直接送信するには、環境変数
-          <code className="mx-1 rounded bg-stone-200 px-1">NEXT_PUBLIC_FORMSPREE_FORM_ID</code>
-          を設定してください（
-          <a
-            href="https://formspree.io/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-amber-600 hover:underline"
-          >
-            Formspree
-          </a>
-          で無料登録後、フォームIDを取得）。
+          フォームから直接送信するには、AWS SES の環境変数を設定してください。
+          <br />
+          <code className="mx-1 rounded bg-stone-200 px-1">SES_FROM_EMAIL</code>、
+          <code className="mx-1 rounded bg-stone-200 px-1">SES_TO_EMAIL</code>、
+          <code className="mx-1 rounded bg-stone-200 px-1">AWS_REGION</code>、
+          <code className="mx-1 rounded bg-stone-200 px-1">AWS_ACCESS_KEY_ID</code>、
+          <code className="mx-1 rounded bg-stone-200 px-1">AWS_SECRET_ACCESS_KEY</code>
           <br />
           ボット対策は Turnstile テストキーで動作します。本番用には
-          <code className="mx-1 rounded bg-stone-200 px-1">NEXT_PUBLIC_TURNSTILE_SITE_KEY</code>
-          を設定してください（Formspree に Secret Key も登録）。
+          <code className="mx-1 rounded bg-stone-200 px-1">NEXT_PUBLIC_TURNSTILE_SITE_KEY</code> と
+          <code className="mx-1 rounded bg-stone-200 px-1">TURNSTILE_SECRET_KEY</code> を設定してください。
         </p>
       </div>
     );
