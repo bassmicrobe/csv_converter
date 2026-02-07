@@ -63,9 +63,7 @@ export function SiteFooter() {
             </a>
           </div>
           <p className="text-sm text-stone-500">
-            © {currentYear} ezcsv — 秘匿情報・個人情報を含むCSVを安全に編集（
-            <strong>データはサーバーに送信されません</strong>
-            ）
+            © {currentYear} ezcsv — 秘匿情報・個人情報を含むCSVを安全に編集
           </p>
         </div>
       </div>
