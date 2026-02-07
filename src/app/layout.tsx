@@ -72,7 +72,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#f59e0b",
+  themeColor: "#10b981",
 };
 
 export default function RootLayout({
@@ -95,13 +95,13 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-stone-50 text-stone-900 min-h-screen">
         <ToastProvider>
-        <CookieConsentProvider>
-        <div className="flex min-h-screen flex-col">
-          <SiteHeader />
-          <div className="flex-1">{children}</div>
-          <SiteFooter />
-        </div>
-        </CookieConsentProvider>
+          <CookieConsentProvider>
+            <div className="flex min-h-screen flex-col">
+              <SiteHeader />
+              <div className="flex-1">{children}</div>
+              <SiteFooter />
+            </div>
+          </CookieConsentProvider>
         </ToastProvider>
       </body>
     </html>

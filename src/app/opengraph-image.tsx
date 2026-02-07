@@ -35,7 +35,7 @@ export default async function Image() {
             width: '600px',
             height: '600px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(245,158,11,0.15) 0%, rgba(245,158,11,0) 70%)',
+            background: 'radial-gradient(circle, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0) 70%)',
           }}
         />
         <div
@@ -46,10 +46,10 @@ export default async function Image() {
             width: '600px',
             height: '600px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(16,185,129,0.1) 0%, rgba(16,185,129,0) 70%)',
+            background: 'radial-gradient(circle, rgba(52,211,153,0.1) 0%, rgba(52,211,153,0) 70%)',
           }}
         />
-        
+
         {/* Main Content */}
         <div
           style={{
@@ -60,20 +60,20 @@ export default async function Image() {
           }}
         >
           <div
-             style={{
-               fontSize: 140,
-               fontWeight: 'bold',
-               background: 'linear-gradient(to bottom right, #f59e0b, #fbbf24)',
-               backgroundClip: 'text',
-               color: 'transparent',
-               letterSpacing: '-0.05em',
-               lineHeight: 1,
-             }}
+            style={{
+              fontSize: 140,
+              fontWeight: 'bold',
+              background: 'linear-gradient(to bottom right, #10b981, #34d399)',
+              backgroundClip: 'text',
+              color: 'transparent',
+              letterSpacing: '-0.05em',
+              lineHeight: 1,
+            }}
           >
             ezcsv
           </div>
         </div>
-        
+
         <div
           style={{
             fontSize: 36,
@@ -85,9 +85,9 @@ export default async function Image() {
         >
           Secure, Client-side CSV/Excel Editor & Converter
         </div>
-        
+
         {/* Features badges */}
-         <div
+        <div
           style={{
             display: 'flex',
             gap: '24px',

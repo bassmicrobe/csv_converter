@@ -100,7 +100,7 @@ export function ExportPanel({
         "border: 1px solid #333333; padding: 4px 8px; color: #171717; background-color: #ffffff;";
     });
     container.querySelectorAll("th").forEach((el) => {
-      (el as HTMLElement).style.backgroundColor = "#f59e0b";
+      (el as HTMLElement).style.backgroundColor = "#10b981";
       (el as HTMLElement).style.color = "#ffffff";
     });
 
@@ -124,7 +124,7 @@ export function ExportPanel({
 
   return (
     <section className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-amber-700">
+      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-emerald-700">
         CSVエクスポート
       </h2>
       <div className="flex flex-wrap items-end gap-4">
@@ -134,7 +134,7 @@ export function ExportPanel({
             value={options.charset}
             onChange={(e) => onOptionsChange({ charset: e.target.value as Charset })}
             disabled={disabled}
-            className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <option value="UTF-8">UTF-8</option>
             <option value="Shift_JIS">Shift_JIS</option>
@@ -146,7 +146,7 @@ export function ExportPanel({
             value={options.delimiter}
             onChange={(e) => onOptionsChange({ delimiter: e.target.value as Delimiter })}
             disabled={disabled}
-            className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <option value=",">カンマ (,)</option>
             <option value="\t">タブ (\t)</option>
@@ -158,7 +158,7 @@ export function ExportPanel({
             value={options.quoteChar}
             onChange={(e) => onOptionsChange({ quoteChar: e.target.value as QuoteChar })}
             disabled={disabled}
-            className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <option value='"'>ダブルクォート (&quot;)</option>
             <option value="">なし</option>
@@ -170,7 +170,7 @@ export function ExportPanel({
             value={options.lineEnding}
             onChange={(e) => onOptionsChange({ lineEnding: e.target.value as LineEnding })}
             disabled={disabled}
-            className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <option value="LF">LF</option>
             <option value="CRLF">CRLF</option>

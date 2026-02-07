@@ -120,7 +120,7 @@ export default function Home() {
                   type="checkbox"
                   checked={hasHeaderRow}
                   onChange={(e) => setHasHeaderRow(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                  className="mt-0.5 h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
                 />
                 <div>
                   <span className="block font-medium text-stone-800">
@@ -147,7 +147,7 @@ export default function Home() {
                 {(hasHeaderRow ? Math.max(0, rowCount - 1) : rowCount).toLocaleString()} 行（データ）
                 × {columnCount} 列
                 {rowCount >= 50_000 && (
-                  <span className="ml-2 text-amber-500">
+                  <span className="ml-2 text-red-500">
                     （上限に達しています）
                   </span>
                 )}

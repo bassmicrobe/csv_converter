@@ -25,7 +25,7 @@ export function ContactForm() {
 
     // AWS SES を使用（Formspree は使用していません）
     const apiEndpoint = "/api/contact";
-    
+
     try {
       const res = await fetch(apiEndpoint, {
         method: "POST",
@@ -54,7 +54,7 @@ export function ContactForm() {
   // AWS SES が未設定の場合はフォールバック表示（開発時のみ）
   if (process.env.NODE_ENV === "development" && !process.env.SES_FROM_EMAIL) {
     return (
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-6">
+      <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-6">
         <p className="text-stone-700">
           お問い合わせは運営会社の窓口より承っております。
         </p>
@@ -63,7 +63,7 @@ export function ContactForm() {
             href="https://cybereye-tech.jp/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
+            className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             お問い合わせはこちら（運営会社サイト）
           </a>
@@ -96,96 +96,96 @@ export function ContactForm() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-stone-700">
-          お名前 <span className="text-red-500">*</span>
-        </label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          required
-          className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-stone-900 shadow-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-          placeholder="山田 太郎"
-          disabled={status === "submitting"}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-stone-700">
-          メールアドレス <span className="text-red-500">*</span>
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-stone-900 shadow-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-          placeholder="example@example.com"
-          disabled={status === "submitting"}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="subject" className="block text-sm font-medium text-stone-700">
-          件名 <span className="text-red-500">*</span>
-        </label>
-        <input
-          id="subject"
-          name="_subject"
-          type="text"
-          required
-          className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-stone-900 shadow-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-          placeholder="ezcsvについてのご質問"
-          disabled={status === "submitting"}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="message" className="block text-sm font-medium text-stone-700">
-          メッセージ <span className="text-red-500">*</span>
-        </label>
-        <textarea
-          id="message"
-          name="message"
-          rows={5}
-          required
-          className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-stone-900 shadow-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-          placeholder="お問い合わせ内容をご記入ください"
-          disabled={status === "submitting"}
-        />
-      </div>
-
-      {status === "success" && (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
-          送信が完了しました。ありがとうございます。
+            お名前 <span className="text-red-500">*</span>
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            required
+            className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-stone-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            placeholder="山田 太郎"
+            disabled={status === "submitting"}
+          />
         </div>
-      )}
 
-      {status === "error" && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-          {errorMessage}
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-stone-700">
+            メールアドレス <span className="text-red-500">*</span>
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-stone-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            placeholder="example@example.com"
+            disabled={status === "submitting"}
+          />
         </div>
-      )}
 
-      {TURNSTILE_SITE_KEY && (
-        <div
-          key={formKey}
-          className="cf-turnstile"
-          data-sitekey={TURNSTILE_SITE_KEY}
-          data-theme="light"
-          data-size="normal"
-        />
-      )}
+        <div>
+          <label htmlFor="subject" className="block text-sm font-medium text-stone-700">
+            件名 <span className="text-red-500">*</span>
+          </label>
+          <input
+            id="subject"
+            name="_subject"
+            type="text"
+            required
+            className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-stone-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            placeholder="ezcsvについてのご質問"
+            disabled={status === "submitting"}
+          />
+        </div>
 
-      <div>
-        <button
-          type="submit"
-          disabled={status === "submitting"}
-          className="rounded-md bg-amber-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {status === "submitting" ? "送信中..." : "送信する"}
-        </button>
-      </div>
-    </form>
+        <div>
+          <label htmlFor="message" className="block text-sm font-medium text-stone-700">
+            メッセージ <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            id="message"
+            name="message"
+            rows={5}
+            required
+            className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-stone-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            placeholder="お問い合わせ内容をご記入ください"
+            disabled={status === "submitting"}
+          />
+        </div>
+
+        {status === "success" && (
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
+            送信が完了しました。ありがとうございます。
+          </div>
+        )}
+
+        {status === "error" && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+            {errorMessage}
+          </div>
+        )}
+
+        {TURNSTILE_SITE_KEY && (
+          <div
+            key={formKey}
+            className="cf-turnstile"
+            data-sitekey={TURNSTILE_SITE_KEY}
+            data-theme="light"
+            data-size="normal"
+          />
+        )}
+
+        <div>
+          <button
+            type="submit"
+            disabled={status === "submitting"}
+            className="rounded-md bg-emerald-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {status === "submitting" ? "送信中..." : "送信する"}
+          </button>
+        </div>
+      </form>
     </>
   );
 }

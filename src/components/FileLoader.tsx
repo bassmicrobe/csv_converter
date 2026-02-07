@@ -26,7 +26,7 @@ export function FileLoader({ onLoad, onCreateNew, loadError, disabled }: FileLoa
 
   return (
     <section className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-amber-700">
+      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-emerald-700">
         CSV読み込み
       </h2>
       <div className="flex flex-wrap items-center gap-4">
@@ -42,7 +42,7 @@ export function FileLoader({ onLoad, onCreateNew, loadError, disabled }: FileLoa
           disabled={disabled || loading}
           className="cursor-pointer rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-md transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           style={{
-            background: "linear-gradient(to right, #8b5cf6, #a855f7, #d946ef)",
+            background: "linear-gradient(to right, #10b981, #059669, #0d9488)",
           }}
         >
           {loading ? "読み込み中..." : "ファイルを選択"}

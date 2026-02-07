@@ -46,7 +46,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="cursor-pointer rounded-lg p-1 text-stone-500 transition hover:bg-stone-100 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="cursor-pointer rounded-lg p-1 text-stone-500 transition hover:bg-stone-100 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             aria-label="閉じる"
           >
             <span className="text-2xl leading-none">&times;</span>

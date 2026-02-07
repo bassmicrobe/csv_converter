@@ -13,7 +13,7 @@ export default function ContactPage() {
       <div className="mb-8">
         <Link
           href="/"
-          className="text-sm text-amber-600 hover:text-amber-700"
+          className="text-sm text-emerald-600 hover:text-emerald-700"
         >
           ← ezcsv トップへ
         </Link>
@@ -34,7 +34,7 @@ export default function ContactPage() {
           href="https://cybereye-tech.jp/"
           target="_blank"
           rel="noopener noreferrer"
-          className="ml-1 text-amber-600 hover:underline"
+          className="ml-1 text-emerald-600 hover:underline"
         >
           サイバーアイ・テクノロジー株式会社
         </a>
@@ -43,7 +43,7 @@ export default function ContactPage() {
       <div className="mt-12">
         <Link
           href="/"
-          className="text-amber-600 hover:text-amber-700"
+          className="text-emerald-600 hover:text-emerald-700"
         >
           ← トップページに戻る
         </Link>

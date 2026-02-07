@@ -95,7 +95,7 @@ function CookieConsentBanner({
           本サイトではアクセス解析（Vercel Analytics）のためにデータを収集しています。
           <Link
             href="/privacy"
-            className="ml-1 text-amber-600 hover:underline"
+            className="ml-1 text-emerald-600 hover:underline"
           >
             プライバシーポリシー
           </Link>
@@ -111,7 +111,7 @@ function CookieConsentBanner({
           <button
             type="button"
             onClick={onAccept}
-            className="rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
+            className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             許可する
           </button>

@@ -239,7 +239,7 @@ export function CsvTable({
                 <button
                   type="button"
                   onClick={onAddRow}
-                  className="cursor-pointer rounded px-2 py-1 text-xs font-medium text-amber-600 hover:bg-amber-100"
+                  className="cursor-pointer rounded px-2 py-1 text-xs font-medium text-emerald-600 hover:bg-emerald-100"
                   title="行を追加"
                 >
                   +行
@@ -276,11 +276,11 @@ export function CsvTable({
                   onClick={() => handleSortClick(displayColIndex)}
                   className="flex flex-1 cursor-pointer items-center gap-1 px-2 py-0 text-left hover:bg-stone-200/50"
                 >
-                  <span className="truncate text-xs font-medium text-amber-700">
+                  <span className="truncate text-xs font-medium text-emerald-700">
                     {label}
                   </span>
                   {isSorted && sortDirection && (
-                    <span className="text-amber-600">
+                    <span className="text-emerald-600">
                       {sortDirection === "asc" ? " ↑" : " ↓"}
                     </span>
                   )}
@@ -298,7 +298,7 @@ export function CsvTable({
                           onClearColumn(displayColIndex);
                           toast?.show("列の内容を空にしました");
                         }}
-                        className="cursor-pointer rounded p-1 text-stone-400 hover:bg-amber-100 hover:text-amber-600"
+                        className="cursor-pointer rounded p-1 text-stone-400 hover:bg-emerald-100 hover:text-emerald-600"
                         title={`列 ${displayColIndex + 1} の内容を空にする`}
                       >
                         ⌫
@@ -334,7 +334,7 @@ export function CsvTable({
             <button
               type="button"
               onClick={onAddColumn}
-              className="cursor-pointer flex shrink-0 items-center justify-center border-l border-dashed border-stone-300 px-3 text-stone-400 hover:bg-stone-100 hover:text-amber-600"
+              className="cursor-pointer flex shrink-0 items-center justify-center border-l border-dashed border-stone-300 px-3 text-stone-400 hover:bg-stone-100 hover:text-emerald-600"
               title="列を追加"
             >
               +列
@@ -370,7 +370,7 @@ export function CsvTable({
                         onClearRow(actualRowIndex);
                         toast?.show("行の内容を空にしました");
                       }}
-                      className="cursor-pointer rounded p-0.5 text-stone-400 opacity-0 group-hover:opacity-100 hover:bg-amber-100 hover:text-amber-600"
+                      className="cursor-pointer rounded p-0.5 text-stone-400 opacity-0 group-hover:opacity-100 hover:bg-emerald-100 hover:text-emerald-600"
                       title={`行 ${actualRowIndex + 1} の内容を空にする`}
                     >
                       ⌫
@@ -455,7 +455,7 @@ function EditableCell({
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           autoFocus
-          className="h-full w-full rounded border border-amber-500/50 bg-white px-2 py-1 text-sm text-stone-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+          className="h-full w-full rounded border border-emerald-500/50 bg-white px-2 py-1 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
         />
       </div>
     );

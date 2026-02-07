@@ -12,7 +12,7 @@ export default function PrivacyPage() {
       <div className="mb-8">
         <Link
           href="/"
-          className="text-sm text-amber-600 hover:text-amber-700"
+          className="text-sm text-emerald-600 hover:text-emerald-700"
         >
           ← ezcsv トップへ
         </Link>
@@ -78,7 +78,7 @@ export default function PrivacyPage() {
           <h2 className="text-lg font-semibold text-stone-900">7. お問い合わせ</h2>
           <p className="mt-2 leading-relaxed">
             プライバシーに関するお問い合わせは、
-            <Link href="/contact" className="text-amber-600 hover:text-amber-700">
+            <Link href="/contact" className="text-emerald-600 hover:text-emerald-700">
               お問い合わせフォーム
             </Link>
             または運営会社（
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
               href="https://cybereye-tech.jp/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-amber-600 hover:text-amber-700"
+              className="text-emerald-600 hover:text-emerald-700"
             >
               サイバーアイ・テクノロジー株式会社
             </a>
@@ -98,7 +98,7 @@ export default function PrivacyPage() {
       <div className="mt-12">
         <Link
           href="/"
-          className="text-amber-600 hover:text-amber-700"
+          className="text-emerald-600 hover:text-emerald-700"
         >
           ← トップページに戻る
         </Link>

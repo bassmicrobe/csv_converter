@@ -6,7 +6,7 @@ export function SiteHeader() {
       <div className="mx-auto flex h-14 max-w-[1600px] items-center justify-between px-4 md:px-6">
         <Link
           href="/"
-          className="flex items-center gap-2 font-bold tracking-tight text-stone-900 transition hover:text-amber-600"
+          className="flex items-center gap-2 font-bold tracking-tight text-stone-900 transition hover:text-emerald-600"
         >
           <span className="text-xl">ezcsv</span>
           <span className="hidden text-sm font-normal text-stone-500 sm:inline">
