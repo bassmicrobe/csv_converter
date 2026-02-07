@@ -27,7 +27,7 @@ export default function ContactError({
         </p>
         <p className="mt-4">
           <a
-            href="https://www.cybereye-tech.jp/"
+            href="https://cybereye-tech.jp/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-amber-600 hover:underline"

@@ -51,9 +51,6 @@ export default function PrivacyPage() {
           <p className="mt-2 leading-relaxed">
             本サービスでは、アクセス解析（Vercel Analytics）の利用について、初回アクセス時に同意の可否を確認するバナーを表示しています。「許可する」を選択した場合のみ解析が有効になります。本サービスは、CSVデータの保存や個人の識別のためにクッキーを使用しません。
           </p>
-          <p className="mt-2 leading-relaxed">
-            一度選択した設定は、フッターの「クッキー設定」からいつでも変更できます。
-          </p>
         </section>
 
         <section>
@@ -86,7 +83,7 @@ export default function PrivacyPage() {
             </Link>
             または運営会社（
             <a
-              href="https://www.cybereye-tech.jp/"
+              href="https://cybereye-tech.jp/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-amber-600 hover:text-amber-700"

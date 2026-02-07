@@ -31,7 +31,7 @@ export default function ContactPage() {
       <p className="mt-8 text-sm text-stone-500">
         運営：
         <a
-          href="https://www.cybereye-tech.jp/"
+          href="https://cybereye-tech.jp/"
           target="_blank"
           rel="noopener noreferrer"
           className="ml-1 text-amber-600 hover:underline"

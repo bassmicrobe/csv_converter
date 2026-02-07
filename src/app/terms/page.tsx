@@ -79,7 +79,7 @@ export default function TermsPage() {
           <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4 text-sm">
             <p className="font-semibold text-stone-900">
               <a
-                href="https://www.cybereye-tech.jp/"
+                href="https://cybereye-tech.jp/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-amber-600 hover:text-amber-700"
@@ -88,16 +88,15 @@ export default function TermsPage() {
               </a>
             </p>
             <p className="mt-1 text-stone-600">代表取締役 高橋亨</p>
-            <p className="mt-1 text-stone-600">〒101-0021 東京都千代田区外神田3丁目6番4号 第一勧業信用組合秋葉原ビル</p>
-            <p className="mt-1 text-stone-600">TEL: 03-6451-1154</p>
+            <p className="mt-1 text-stone-600">〒101-0024 東京都千代田区神田和泉町1番地6-16 ヤマトビル405</p>
             <p className="mt-2">
               <a
-                href="https://www.cybereye-tech.jp/"
+                href="https://cybereye-tech.jp/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-amber-600 hover:text-amber-700"
               >
-                https://www.cybereye-tech.jp/
+                https://cybereye-tech.jp/
               </a>
             </p>
           </div>

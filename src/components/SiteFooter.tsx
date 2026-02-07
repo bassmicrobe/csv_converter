@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { CookieSettingsLink } from "@/components/CookieConsent";
 
 export function SiteFooter() {
   const currentYear = new Date().getFullYear();
@@ -54,9 +53,8 @@ export function SiteFooter() {
             <Link href="/privacy" className="text-sm text-stone-500 hover:text-amber-600">
               プライバシーポリシー
             </Link>
-            <CookieSettingsLink />
             <a
-              href="https://www.cybereye-tech.jp/"
+              href="https://cybereye-tech.jp/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-stone-500 hover:text-amber-600"
@@ -65,16 +63,7 @@ export function SiteFooter() {
             </a>
           </div>
           <p className="text-sm text-stone-500">
-            © {currentYear}{" "}
-            <a
-              href="https://www.cybereye-tech.jp/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-amber-600"
-            >
-              サイバーアイ・テクノロジー株式会社
-            </a>{" "}
-            — ezcsv 秘匿情報・個人情報を含むCSVを安全に編集（
+            © {currentYear} ezcsv — 秘匿情報・個人情報を含むCSVを安全に編集（
             <strong>データはサーバーに送信されません</strong>
             ）
           </p>

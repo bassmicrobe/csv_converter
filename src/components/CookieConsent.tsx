@@ -77,29 +77,6 @@ export function CookieConsentProvider({
   );
 }
 
-function CookieSettingsLink() {
-  const handleClick = () => {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-      window.location.reload();
-    } catch {
-      /* ignore */
-    }
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={handleClick}
-      className="text-sm text-stone-500 hover:text-amber-600"
-    >
-      クッキー設定
-    </button>
-  );
-}
-
-export { CookieSettingsLink };
-
 function CookieConsentBanner({
   onAccept,
   onReject,
