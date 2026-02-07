@@ -23,8 +23,11 @@ export function ContactForm() {
     setStatus("submitting");
     setErrorMessage("");
 
+    // AWS SES を使用（Formspree は使用していません）
+    const apiEndpoint = "/api/contact";
+    
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch(apiEndpoint, {
         method: "POST",
         body: formData,
       });
@@ -36,11 +39,15 @@ export function ContactForm() {
       } else {
         const data = await res.json().catch(() => ({}));
         setStatus("error");
-        setErrorMessage(data.error || "送信に失敗しました。しばらくしてからお試しください。");
+        if (res.status === 404) {
+          setErrorMessage("API が見つかりません。ページを再読み込みしてください。");
+        } else {
+          setErrorMessage(data.error || `送信に失敗しました（${res.status}）。しばらくしてからお試しください。`);
+        }
       }
-    } catch {
+    } catch (error) {
       setStatus("error");
-      setErrorMessage("送信に失敗しました。ネットワーク接続を確認してください。");
+      setErrorMessage(`送信に失敗しました。ネットワーク接続を確認してください。${error instanceof Error ? ` (${error.message})` : ""}`);
     }
   };
 
