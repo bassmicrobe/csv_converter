@@ -11,7 +11,8 @@ const siteUrl = "https://ezcsv.com";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "ezcsv | 無料のCSV編集ツール - オンラインでブラウザ完結・データ送信なし",
+    default:
+      "ezcsv | 無料のCSV編集ツール - オンラインでブラウザ完結・データ送信なし",
     template: "%s | ezcsv",
   },
   description:

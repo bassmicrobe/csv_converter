@@ -30,7 +30,9 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-stone-900">2. サービスの内容</h2>
+          <h2 className="text-lg font-semibold text-stone-900">
+            2. サービスの内容
+          </h2>
           <p className="mt-2 leading-relaxed">
             本サービスは、ブラウザ上でCSV・TSVファイルを編集・変換するためのツールです。すべての処理は利用者のブラウザ内で完結し、CSVデータは当サイトのサーバーに送信されません。無料で提供されており、登録やログインは不要です。
           </p>
@@ -58,14 +60,18 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-stone-900">5. 変更・中止</h2>
+          <h2 className="text-lg font-semibold text-stone-900">
+            5. 変更・中止
+          </h2>
           <p className="mt-2 leading-relaxed">
             当サイトは、事前の通知なく本サービスの内容を変更し、または提供を中止する場合があります。これにより利用者に生じた損害について、当サイトは責任を負いません。
           </p>
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-stone-900">6. 規約の変更</h2>
+          <h2 className="text-lg font-semibold text-stone-900">
+            6. 規約の変更
+          </h2>
           <p className="mt-2 leading-relaxed">
             当サイトは、必要に応じて本規約を変更することがあります。変更後の規約は、当サイトに掲載した時点から効力を生じるものとします。
           </p>
@@ -88,7 +94,9 @@ export default function TermsPage() {
               </a>
             </p>
             <p className="mt-1 text-stone-600">代表取締役 高橋亨</p>
-            <p className="mt-1 text-stone-600">〒101-0024 東京都千代田区神田和泉町1番地6-16 ヤマトビル405</p>
+            <p className="mt-1 text-stone-600">
+              〒101-0024 東京都千代田区神田和泉町1番地6-16 ヤマトビル405
+            </p>
             <p className="mt-2">
               <a
                 href="https://cybereye-tech.jp/"
@@ -104,10 +112,7 @@ export default function TermsPage() {
       </div>
 
       <div className="mt-12">
-        <Link
-          href="/"
-          className="text-emerald-600 hover:text-emerald-700"
-        >
+        <Link href="/" className="text-emerald-600 hover:text-emerald-700">
           ← トップページに戻る
         </Link>
       </div>

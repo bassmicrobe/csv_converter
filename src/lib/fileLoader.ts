@@ -6,7 +6,7 @@ import type { Charset } from "./types";
  */
 export async function readFileAsText(
   file: File,
-  charset: Charset
+  charset: Charset,
 ): Promise<string> {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = new Uint8Array(arrayBuffer);

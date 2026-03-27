@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface SearchFilterProps {
   data: string[][];
@@ -26,7 +26,8 @@ export function SearchFilter({
   const searchDataRows = hasHeaderRow ? data.slice(1) : data;
 
   const actualSearchCol = columnOrder
-    ? columnOrder[Math.min(searchColumn, columnOrder.length - 1)] ?? searchColumn
+    ? (columnOrder[Math.min(searchColumn, columnOrder.length - 1)] ??
+      searchColumn)
     : searchColumn;
 
   const filteredIndices = useMemo(() => {
@@ -40,20 +41,23 @@ export function SearchFilter({
         return cell.includes(lower) ? searchStartRow + i : -1;
       })
       .filter((i) => i >= 0);
-  }, [searchDataRows, actualSearchCol, searchText, columnCount, searchStartRow]);
+  }, [
+    searchDataRows,
+    actualSearchCol,
+    searchText,
+    columnCount,
+    searchStartRow,
+  ]);
 
   const headerLabels = useMemo(() => {
     if (!hasHeaderRow || !data[0]) return null;
     return data[0];
   }, [hasHeaderRow, data]);
 
-  const handleColumnChange = useCallback(
-    (col: number) => {
-      setSearchColumn(col);
-      // searchText はそのまま、filteredIndices は useMemo で再計算される
-    },
-    []
-  );
+  const handleColumnChange = useCallback((col: number) => {
+    setSearchColumn(col);
+    // searchText はそのまま、filteredIndices は useMemo で再計算される
+  }, []);
 
   const handleSearchChange = useCallback((text: string) => {
     setSearchText(text);
@@ -73,8 +77,14 @@ export function SearchFilter({
       </h2>
       <div className="flex flex-wrap items-center gap-4">
         <div>
-          <label className="mb-1 block text-xs text-stone-600">カラム</label>
+          <label
+            htmlFor="search-filter-column"
+            className="mb-1 block text-xs text-stone-600"
+          >
+            カラム
+          </label>
           <select
+            id="search-filter-column"
             value={searchColumn}
             onChange={(e) => handleColumnChange(Number(e.target.value))}
             disabled={disabled}
@@ -84,7 +94,7 @@ export function SearchFilter({
               const actualCol = columnOrder?.[i] ?? i;
               const label = headerLabels?.[actualCol];
               return (
-                <option key={i} value={i}>
+                <option key={actualCol} value={i}>
                   {label ? `${label} (Col${i + 1})` : `Col ${i + 1}`}
                 </option>
               );
@@ -92,8 +102,14 @@ export function SearchFilter({
           </select>
         </div>
         <div className="flex-1 min-w-[200px]">
-          <label className="mb-1 block text-xs text-stone-600">検索文字列</label>
+          <label
+            htmlFor="search-filter-query"
+            className="mb-1 block text-xs text-stone-600"
+          >
+            検索文字列
+          </label>
           <input
+            id="search-filter-query"
             type="text"
             value={searchText}
             onChange={(e) => handleSearchChange(e.target.value)}

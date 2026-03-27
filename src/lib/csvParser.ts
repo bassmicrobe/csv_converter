@@ -11,7 +11,7 @@ export interface ParseResult {
  */
 export function parseCsv(
   rawText: string,
-  options: Pick<CsvOptions, "delimiter" | "quoteChar">
+  options: Pick<CsvOptions, "delimiter" | "quoteChar">,
 ): ParseResult {
   const { delimiter, quoteChar } = options;
   const rows: string[][] = [];

@@ -13,9 +13,9 @@ function deepCopyData(d: string[][]): string[][] {
 }
 
 export function useCsvEditor() {
-  const [history, setHistory] = useState<{ data: string[][]; columnOrder: number[] }[]>([
-    { data: [], columnOrder: [] },
-  ]);
+  const [history, setHistory] = useState<
+    { data: string[][]; columnOrder: number[] }[]
+  >([{ data: [], columnOrder: [] }]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [options, setOptions] = useState<CsvOptions>({
     charset: "UTF-8",
@@ -28,26 +28,27 @@ export function useCsvEditor() {
   const data = history[historyIndex].data;
   const columnOrder = history[historyIndex].columnOrder;
 
-  const pushState = useCallback((newData: string[][], newColumnOrder: number[]) => {
-    setHistory((prev) => {
-      const trimmed = prev.slice(0, historyIndex + 1);
-      const next = [
-        ...trimmed,
-        { data: deepCopyData(newData), columnOrder: [...newColumnOrder] },
-      ];
-      return next.slice(-MAX_HISTORY);
-    });
-    setHistoryIndex((prev) => Math.min(prev + 1, MAX_HISTORY - 1));
-  }, [historyIndex]);
+  const pushState = useCallback(
+    (newData: string[][], newColumnOrder: number[]) => {
+      setHistory((prev) => {
+        const trimmed = prev.slice(0, historyIndex + 1);
+        const next = [
+          ...trimmed,
+          { data: deepCopyData(newData), columnOrder: [...newColumnOrder] },
+        ];
+        return next.slice(-MAX_HISTORY);
+      });
+      setHistoryIndex((prev) => Math.min(prev + 1, MAX_HISTORY - 1));
+    },
+    [historyIndex],
+  );
 
   const undo = useCallback(() => {
     setHistoryIndex((prev) => (prev > 0 ? prev - 1 : prev));
   }, []);
 
   const redo = useCallback(() => {
-    setHistoryIndex((prev) =>
-      prev < history.length - 1 ? prev + 1 : prev
-    );
+    setHistoryIndex((prev) => (prev < history.length - 1 ? prev + 1 : prev));
   }, [history.length]);
 
   const loadFile = useCallback(async (file: File) => {
@@ -61,36 +62,42 @@ export function useCsvEditor() {
 
       if (result.error) {
         setLoadError(
-          result.errorDetail ? `構文エラー\n${result.error}` : result.error
+          result.errorDetail ? `構文エラー\n${result.error}` : result.error,
         );
         return;
       }
 
       if (result.data.length > MAX_ROWS) {
         setLoadError(
-          `行数が上限（${MAX_ROWS.toLocaleString()}行）を超えています。処理負荷が高くなるため読み込みを中断しました。`
+          `行数が上限（${MAX_ROWS.toLocaleString()}行）を超えています。処理負荷が高くなるため読み込みを中断しました。`,
         );
         return;
       }
 
       const cols = result.data[0]?.length ?? 0;
       const newColumnOrder = Array.from({ length: cols }, (_, i) => i);
-      setHistory([{ data: deepCopyData(result.data), columnOrder: newColumnOrder }]);
+      setHistory([
+        { data: deepCopyData(result.data), columnOrder: newColumnOrder },
+      ]);
       setHistoryIndex(0);
       setOptions(detectedOptions);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "ファイルの読み込みに失敗しました";
+      const msg =
+        err instanceof Error ? err.message : "ファイルの読み込みに失敗しました";
       setLoadError(msg.includes("\n") ? `読み込みエラー\n${msg}` : msg);
     }
   }, []);
 
-  const updateCell = useCallback((rowIndex: number, colIndex: number, value: string) => {
-    const next = data.map((r) => [...r]);
-    if (!next[rowIndex]) return;
-    while (next[rowIndex].length <= colIndex) next[rowIndex].push("");
-    next[rowIndex][colIndex] = value;
-    pushState(next, columnOrder);
-  }, [data, columnOrder, pushState]);
+  const updateCell = useCallback(
+    (rowIndex: number, colIndex: number, value: string) => {
+      const next = data.map((r) => [...r]);
+      if (!next[rowIndex]) return;
+      while (next[rowIndex].length <= colIndex) next[rowIndex].push("");
+      next[rowIndex][colIndex] = value;
+      pushState(next, columnOrder);
+    },
+    [data, columnOrder, pushState],
+  );
 
   const addRow = useCallback(() => {
     const colCount = data[0]?.length ?? 1;
@@ -104,49 +111,61 @@ export function useCsvEditor() {
     pushState(newData, newColumnOrder);
   }, [data, columnOrder, pushState]);
 
-  const deleteRow = useCallback((rowIndex: number) => {
-    const newData = data.filter((_, i) => i !== rowIndex);
-    pushState(newData, columnOrder);
-  }, [data, columnOrder, pushState]);
-
-  const deleteColumn = useCallback((displayColIndex: number) => {
-    const actualCol = columnOrder[displayColIndex];
-    if (actualCol == null) return;
-    const newData = data.map((row) => row.filter((_, i) => i !== actualCol));
-    const newColumnOrder = columnOrder
-      .filter((i) => i !== actualCol)
-      .map((i) => (i > actualCol ? i - 1 : i));
-    pushState(newData, newColumnOrder);
-  }, [data, columnOrder, pushState]);
-
-  const clearRow = useCallback((rowIndex: number) => {
-    const next = data.map((r) => [...r]);
-    if (!next[rowIndex]) return;
-    next[rowIndex] = Array.from({ length: next[rowIndex].length }, () => "");
-    pushState(next, columnOrder);
-  }, [data, columnOrder, pushState]);
-
-  const clearColumn = useCallback((displayColIndex: number) => {
-    const actualCol = columnOrder[displayColIndex];
-    if (actualCol == null) return;
-    const newData = data.map((row) => {
-      const r = [...row];
-      if (actualCol < r.length) r[actualCol] = "";
-      return r;
-    });
-    pushState(newData, columnOrder);
-  }, [data, columnOrder, pushState]);
-
-  const reorderColumns = useCallback((newOrder: number[]) => {
-    pushState(data, newOrder);
-  }, [data, pushState]);
-
-  const setExportOptions = useCallback(
-    (updates: Partial<CsvOptions>) => {
-      setOptions((prev) => ({ ...prev, ...updates }));
+  const deleteRow = useCallback(
+    (rowIndex: number) => {
+      const newData = data.filter((_, i) => i !== rowIndex);
+      pushState(newData, columnOrder);
     },
-    []
+    [data, columnOrder, pushState],
   );
+
+  const deleteColumn = useCallback(
+    (displayColIndex: number) => {
+      const actualCol = columnOrder[displayColIndex];
+      if (actualCol == null) return;
+      const newData = data.map((row) => row.filter((_, i) => i !== actualCol));
+      const newColumnOrder = columnOrder
+        .filter((i) => i !== actualCol)
+        .map((i) => (i > actualCol ? i - 1 : i));
+      pushState(newData, newColumnOrder);
+    },
+    [data, columnOrder, pushState],
+  );
+
+  const clearRow = useCallback(
+    (rowIndex: number) => {
+      const next = data.map((r) => [...r]);
+      if (!next[rowIndex]) return;
+      next[rowIndex] = Array.from({ length: next[rowIndex].length }, () => "");
+      pushState(next, columnOrder);
+    },
+    [data, columnOrder, pushState],
+  );
+
+  const clearColumn = useCallback(
+    (displayColIndex: number) => {
+      const actualCol = columnOrder[displayColIndex];
+      if (actualCol == null) return;
+      const newData = data.map((row) => {
+        const r = [...row];
+        if (actualCol < r.length) r[actualCol] = "";
+        return r;
+      });
+      pushState(newData, columnOrder);
+    },
+    [data, columnOrder, pushState],
+  );
+
+  const reorderColumns = useCallback(
+    (newOrder: number[]) => {
+      pushState(data, newOrder);
+    },
+    [data, pushState],
+  );
+
+  const setExportOptions = useCallback((updates: Partial<CsvOptions>) => {
+    setOptions((prev) => ({ ...prev, ...updates }));
+  }, []);
 
   const clearData = useCallback(() => {
     setHistory([{ data: [], columnOrder: [] }]);
@@ -157,7 +176,7 @@ export function useCsvEditor() {
   const createNew = useCallback((rows = 1, cols = 4) => {
     setLoadError(null);
     const newData = Array.from({ length: rows }, () =>
-      Array.from({ length: cols }, () => "")
+      Array.from({ length: cols }, () => ""),
     );
     const newColumnOrder = Array.from({ length: cols }, (_, i) => i);
     setHistory([{ data: newData, columnOrder: newColumnOrder }]);

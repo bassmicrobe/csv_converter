@@ -21,7 +21,8 @@ export default function ContactPage() {
 
       <h1 className="text-2xl font-bold text-stone-900">お問い合わせ</h1>
       <p className="mt-2 text-stone-600">
-        ezcsv に関するご質問・ご要望がございましたら、以下のフォームよりお送りください。
+        ezcsv
+        に関するご質問・ご要望がございましたら、以下のフォームよりお送りください。
       </p>
 
       <div className="mt-8">
@@ -41,10 +42,7 @@ export default function ContactPage() {
       </p>
 
       <div className="mt-12">
-        <Link
-          href="/"
-          className="text-emerald-600 hover:text-emerald-700"
-        >
+        <Link href="/" className="text-emerald-600 hover:text-emerald-700">
           ← トップページに戻る
         </Link>
       </div>

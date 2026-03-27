@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useCallback, useMemo, useState, useEffect } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useToast } from "@/components/Toast";
 import type { CsvOptions } from "@/lib/types";
 
@@ -50,7 +50,7 @@ export function CsvTable({
   onDeleteColumn,
   onClearRow,
   onClearColumn,
-  options,
+  options: _options,
   searchColumn,
   onUpdateCell,
 }: CsvTableProps) {
@@ -64,11 +64,11 @@ export function CsvTable({
   const getColumnWidth = useCallback(
     (displayColIndex: number) => {
       const actualCol = columnOrder[displayColIndex];
-      return (actualCol != null && columnWidths[actualCol] != null)
+      return actualCol != null && columnWidths[actualCol] != null
         ? columnWidths[actualCol]
         : COL_WIDTH;
     },
-    [columnOrder, columnWidths]
+    [columnOrder, columnWidths],
   );
 
   const handleResizeStart = useCallback(
@@ -79,7 +79,7 @@ export function CsvTable({
       resizeStartX.current = e.clientX;
       resizeStartWidth.current = getColumnWidth(displayColIndex);
     },
-    [getColumnWidth]
+    [getColumnWidth],
   );
 
   useEffect(() => {
@@ -90,7 +90,7 @@ export function CsvTable({
       const delta = e.clientX - resizeStartX.current;
       const newWidth = Math.min(
         COL_MAX_WIDTH,
-        Math.max(COL_MIN_WIDTH, resizeStartWidth.current + delta)
+        Math.max(COL_MIN_WIDTH, resizeStartWidth.current + delta),
       );
       setColumnWidths((prev) => ({ ...prev, [actualCol]: newWidth }));
     };
@@ -129,9 +129,8 @@ export function CsvTable({
 
   const rows = useMemo(
     () => sortedIndices.map((i) => data[i]),
-    [sortedIndices, data]
+    [sortedIndices, data],
   );
-  const colCount = columnOrder.length;
 
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
@@ -142,7 +141,7 @@ export function CsvTable({
 
   const getActualRowIndex = useCallback(
     (virtualIndex: number) => sortedIndices[virtualIndex],
-    [sortedIndices]
+    [sortedIndices],
   );
 
   const handleSortClick = useCallback(
@@ -157,7 +156,7 @@ export function CsvTable({
           : "asc";
       onSortChange(next ? colIndex : null, next);
     },
-    [sortColumn, sortDirection, onSortChange]
+    [sortColumn, sortDirection, onSortChange],
   );
 
   const handleCellChange = useCallback(
@@ -166,7 +165,7 @@ export function CsvTable({
       const actualColIndex = columnOrder[displayColIndex] ?? displayColIndex;
       onUpdateCell(actualRowIndex, actualColIndex, value);
     },
-    [getActualRowIndex, columnOrder, onUpdateCell]
+    [getActualRowIndex, columnOrder, onUpdateCell],
   );
 
   const handleColumnDragStart = useCallback(
@@ -174,7 +173,7 @@ export function CsvTable({
       e.dataTransfer.setData("text/plain", String(displayColIndex));
       e.dataTransfer.effectAllowed = "move";
     },
-    []
+    [],
   );
 
   const handleColumnDragOver = useCallback((e: React.DragEvent) => {
@@ -192,7 +191,7 @@ export function CsvTable({
       newOrder.splice(dropDisplayIndex, 0, removed);
       onColumnOrderChange?.(newOrder);
     },
-    [columnOrder, onColumnOrderChange]
+    [columnOrder, onColumnOrderChange],
   );
 
   const headerRow = hasHeaderRow && data[0] ? data[0] : null;
@@ -207,7 +206,8 @@ export function CsvTable({
 
   const virtualRows = rowVirtualizer.getVirtualItems();
 
-  const hasRowActions = onAddRow != null || onDeleteRow != null || onClearRow != null;
+  const hasRowActions =
+    onAddRow != null || onDeleteRow != null || onClearRow != null;
   const hasColActions = onDeleteColumn != null || onClearColumn != null;
   const tableMinWidth =
     (hasRowActions ? ROW_ACTION_WIDTH : 0) +
@@ -254,17 +254,21 @@ export function CsvTable({
             const isSorted = sortColumn === displayColIndex;
             const w = getColumnWidth(displayColIndex);
             return (
+              // biome-ignore lint/a11y/noStaticElementInteractions: 列ヘッダーへの HTML5 ドラッグ＆ドロップ用
               <div
-                key={displayColIndex}
+                key={actualColIndex}
                 onDragOver={handleColumnDragOver}
                 onDrop={(e) => handleColumnDrop(e, displayColIndex)}
                 className="group/col relative flex shrink-0 items-center gap-0.5 border-r border-stone-200 last:border-r-0"
                 style={{ width: w }}
               >
                 {onColumnOrderChange && (
+                  // biome-ignore lint/a11y/noStaticElementInteractions: 列並び替え用ドラッグハンドル（キーボードはヘッダーボタンで代替）
                   <span
                     draggable
-                    onDragStart={(e) => handleColumnDragStart(e, displayColIndex)}
+                    onDragStart={(e) =>
+                      handleColumnDragStart(e, displayColIndex)
+                    }
                     className="cursor-grab touch-none select-none px-1 py-0.5 text-stone-400 hover:text-stone-600 active:cursor-grabbing"
                     title="ドラッグで列の並び順を変更"
                   >
@@ -285,7 +289,9 @@ export function CsvTable({
                     </span>
                   )}
                   {!isSorted && (
-                    <span className="text-stone-400" title="クリックでソート">⇅</span>
+                    <span className="text-stone-400" title="クリックでソート">
+                      ⇅
+                    </span>
                   )}
                 </button>
                 {hasColActions && (
@@ -320,12 +326,11 @@ export function CsvTable({
                     )}
                   </div>
                 )}
+                {/* biome-ignore lint/a11y/noStaticElementInteractions: 列幅リサイズ用ドラッグハンドル */}
                 <div
                   onMouseDown={(e) => handleResizeStart(displayColIndex, e)}
                   className="absolute -right-1 top-0 z-20 h-full w-3 cursor-col-resize"
                   title="ドラッグで列の幅を変更"
-                  role="separator"
-                  aria-orientation="vertical"
                 />
               </div>
             );
@@ -393,7 +398,7 @@ export function CsvTable({
               )}
               {columnOrder.map((actualColIndex, displayColIndex) => (
                 <EditableCell
-                  key={displayColIndex}
+                  key={actualColIndex}
                   value={row[actualColIndex] ?? ""}
                   onBlur={(value) =>
                     handleCellChange(virtualRow.index, displayColIndex, value)
@@ -423,10 +428,17 @@ function EditableCell({
 }) {
   const [local, setLocal] = useState(value);
   const [editing, setEditing] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setLocal(value);
   }, [value]);
+
+  useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus();
+    }
+  }, [editing]);
 
   const handleBlur = () => {
     setEditing(false);
@@ -449,12 +461,12 @@ function EditableCell({
         style={{ width }}
       >
         <input
+          ref={inputRef}
           type="text"
           value={local}
           onChange={(e) => setLocal(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          autoFocus
           className="h-full w-full rounded border border-emerald-500/50 bg-white px-2 py-1 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
         />
       </div>
@@ -462,14 +474,16 @@ function EditableCell({
   }
 
   return (
-    <div
+    <button
+      type="button"
       onClick={() => setEditing(true)}
-      className="flex shrink-0 cursor-text items-center overflow-hidden border-r border-stone-200 px-2 py-1 last:border-r-0"
+      className="flex shrink-0 cursor-text items-center overflow-hidden border-r border-stone-200 px-2 py-1 text-left last:border-r-0"
       style={{ width }}
       title={value}
     >
-      <span className="block truncate text-sm text-stone-900">{value || "\u00A0"}</span>
-    </div>
+      <span className="block truncate text-sm text-stone-900">
+        {value || "\u00A0"}
+      </span>
+    </button>
   );
 }
-

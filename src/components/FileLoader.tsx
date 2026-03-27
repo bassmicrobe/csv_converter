@@ -9,7 +9,12 @@ interface FileLoaderProps {
   disabled?: boolean;
 }
 
-export function FileLoader({ onLoad, onCreateNew, loadError, disabled }: FileLoaderProps) {
+export function FileLoader({
+  onLoad,
+  onCreateNew,
+  loadError,
+  disabled,
+}: FileLoaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
 
@@ -38,6 +43,7 @@ export function FileLoader({ onLoad, onCreateNew, loadError, disabled }: FileLoa
           className="hidden"
         />
         <button
+          type="button"
           onClick={triggerSelect}
           disabled={disabled || loading}
           className="cursor-pointer rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-md transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
@@ -64,7 +70,9 @@ export function FileLoader({ onLoad, onCreateNew, loadError, disabled }: FileLoa
           className="mt-3 rounded-lg border border-red-200 bg-red-50 p-4"
           role="alert"
         >
-          <p className="whitespace-pre-line text-sm text-red-800">{loadError}</p>
+          <p className="whitespace-pre-line text-sm text-red-800">
+            {loadError}
+          </p>
         </div>
       )}
     </section>

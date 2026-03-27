@@ -4,9 +4,9 @@ import {
   createContext,
   useCallback,
   useContext,
-  useState,
-  useRef,
   useEffect,
+  useRef,
+  useState,
 } from "react";
 
 export type ToastVariant = "success" | "error";
@@ -26,8 +26,7 @@ export function useToast() {
 const variantStyles: Record<ToastVariant, string> = {
   success:
     "border-emerald-400 bg-emerald-50 ring-emerald-200/80 text-emerald-900",
-  error:
-    "border-red-400 bg-red-50 ring-red-200/80 text-red-900",
+  error: "border-red-400 bg-red-50 ring-red-200/80 text-red-900",
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
@@ -49,7 +48,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     () => () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     },
-    []
+    [],
   );
 
   return (

@@ -1,5 +1,11 @@
 import iconv from "iconv-lite";
-import type { CsvOptions, Charset, Delimiter, QuoteChar, LineEnding } from "./types";
+import type {
+  Charset,
+  CsvOptions,
+  Delimiter,
+  LineEnding,
+  QuoteChar,
+} from "./types";
 
 export interface DetectResult {
   text: string;
@@ -25,7 +31,7 @@ export async function detectAndReadCsv(file: File): Promise<DetectResult> {
     throw new Error(
       `文字コードの解釈に失敗しました（${charset} として判定）。\n` +
         `別の文字コードで保存し直すか、UTF-8（BOM あり）で保存してください。\n` +
-        `詳細: ${msg}`
+        `詳細: ${msg}`,
     );
   }
 
@@ -71,7 +77,10 @@ function detectLineEnding(buffer: Uint8Array): LineEnding {
     if (buffer[i] === 0x0d && buffer[i + 1] === 0x0a) crlfCount++;
     else if (buffer[i] === 0x0a && buffer[i - 1] !== 0x0d) lfCount++;
   }
-  if (buffer[buffer.length - 1] === 0x0a && buffer[buffer.length - 2] !== 0x0d) {
+  if (
+    buffer[buffer.length - 1] === 0x0a &&
+    buffer[buffer.length - 2] !== 0x0d
+  ) {
     lfCount++;
   }
   return crlfCount > lfCount ? "CRLF" : "LF";
@@ -104,7 +113,7 @@ function detectDelimiter(text: string): Delimiter {
   return tabScore > commaScore ? "\t" : ",";
 }
 
-function detectQuoteChar(text: string, delimiter: Delimiter): QuoteChar {
+function detectQuoteChar(text: string, _delimiter: Delimiter): QuoteChar {
   const sample = text.slice(0, 2000);
   const quoteCount = (sample.match(/"/g) ?? []).length;
   if (quoteCount >= 2) {

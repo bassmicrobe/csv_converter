@@ -2,7 +2,11 @@ const webApp = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: "ezcsv",
-  alternateName: ["ezcsv CSV編集ツール", "ezcsv CSVエディタ", "ezcsv オンラインCSV編集"],
+  alternateName: [
+    "ezcsv CSV編集ツール",
+    "ezcsv CSVエディタ",
+    "ezcsv オンラインCSV編集",
+  ],
   url: "https://ezcsv.com",
   description:
     "ezcsvは無料のオンラインCSV編集ツール。ブラウザだけでCSV・TSVを編集・変換。データはサーバーに送信されず完全にローカルで動作。UTF-8/Shift_JIS対応、5万行まで。",
@@ -72,14 +76,12 @@ const faq = {
 export function JsonLd() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webApp) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faq) }}
-      />
+      <script type="application/ld+json" suppressHydrationWarning>
+        {JSON.stringify(webApp)}
+      </script>
+      <script type="application/ld+json" suppressHydrationWarning>
+        {JSON.stringify(faq)}
+      </script>
     </>
   );
 }

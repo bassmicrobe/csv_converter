@@ -1,9 +1,15 @@
 "use client";
 
-import { useCallback, useState } from "react";
 import iconv from "iconv-lite";
+import { useCallback, useState } from "react";
 import { exportCsv } from "@/lib/csvExporter";
-import type { CsvOptions, Charset, Delimiter, QuoteChar, LineEnding } from "@/lib/types";
+import type {
+  Charset,
+  CsvOptions,
+  Delimiter,
+  LineEnding,
+  QuoteChar,
+} from "@/lib/types";
 
 function escapeHtml(text: string): string {
   const div = document.createElement("div");
@@ -41,7 +47,10 @@ export function ExportPanel({
         : new TextEncoder().encode(csv);
     const bytes = new Uint8Array(raw);
     const blob = new Blob([bytes], {
-      type: options.charset === "Shift_JIS" ? "text/csv;charset=shift-jis" : "text/csv;charset=utf-8",
+      type:
+        options.charset === "Shift_JIS"
+          ? "text/csv;charset=shift-jis"
+          : "text/csv;charset=utf-8",
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -66,7 +75,7 @@ export function ExportPanel({
       .slice(1)
       .map(
         (row) =>
-          `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`
+          `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`,
       )
       .join("");
 
@@ -79,7 +88,10 @@ export function ExportPanel({
 
     // iframe 内で描画し、Tailwind の lab/oklch が html2canvas に渡らないようにする
     const iframe = document.createElement("iframe");
-    iframe.setAttribute("style", "position: fixed; left: -9999px; top: 0; width: 1200px; height: 800px;");
+    iframe.setAttribute(
+      "style",
+      "position: fixed; left: -9999px; top: 0; width: 1200px; height: 800px;",
+    );
     document.body.appendChild(iframe);
     const doc = iframe.contentDocument ?? iframe.contentWindow?.document;
     if (!doc) {
@@ -129,10 +141,18 @@ export function ExportPanel({
       </h2>
       <div className="flex flex-wrap items-end gap-4">
         <div>
-          <label className="mb-1 block text-xs text-stone-600">文字コード</label>
+          <label
+            htmlFor="export-charset"
+            className="mb-1 block text-xs text-stone-600"
+          >
+            文字コード
+          </label>
           <select
+            id="export-charset"
             value={options.charset}
-            onChange={(e) => onOptionsChange({ charset: e.target.value as Charset })}
+            onChange={(e) =>
+              onOptionsChange({ charset: e.target.value as Charset })
+            }
             disabled={disabled}
             className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -141,10 +161,18 @@ export function ExportPanel({
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs text-stone-600">区切り文字</label>
+          <label
+            htmlFor="export-delimiter"
+            className="mb-1 block text-xs text-stone-600"
+          >
+            区切り文字
+          </label>
           <select
+            id="export-delimiter"
             value={options.delimiter}
-            onChange={(e) => onOptionsChange({ delimiter: e.target.value as Delimiter })}
+            onChange={(e) =>
+              onOptionsChange({ delimiter: e.target.value as Delimiter })
+            }
             disabled={disabled}
             className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -153,10 +181,18 @@ export function ExportPanel({
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs text-stone-600">囲み文字</label>
+          <label
+            htmlFor="export-quote"
+            className="mb-1 block text-xs text-stone-600"
+          >
+            囲み文字
+          </label>
           <select
+            id="export-quote"
             value={options.quoteChar}
-            onChange={(e) => onOptionsChange({ quoteChar: e.target.value as QuoteChar })}
+            onChange={(e) =>
+              onOptionsChange({ quoteChar: e.target.value as QuoteChar })
+            }
             disabled={disabled}
             className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -165,10 +201,18 @@ export function ExportPanel({
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs text-stone-600">改行コード</label>
+          <label
+            htmlFor="export-line-ending"
+            className="mb-1 block text-xs text-stone-600"
+          >
+            改行コード
+          </label>
           <select
+            id="export-line-ending"
             value={options.lineEnding}
-            onChange={(e) => onOptionsChange({ lineEnding: e.target.value as LineEnding })}
+            onChange={(e) =>
+              onOptionsChange({ lineEnding: e.target.value as LineEnding })
+            }
             disabled={disabled}
             className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -178,6 +222,7 @@ export function ExportPanel({
         </div>
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={handleExport}
             disabled={disabled || data.length === 0 || exportingCsv}
             className="cursor-pointer rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
@@ -185,6 +230,7 @@ export function ExportPanel({
             {exportingCsv ? "出力中..." : "CSV"}
           </button>
           <button
+            type="button"
             onClick={handleExportPdf}
             disabled={disabled || data.length === 0 || exportingPdf}
             className="cursor-pointer rounded-lg bg-red-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"

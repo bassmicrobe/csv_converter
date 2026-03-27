@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 export default function ContactError({
-  error,
+  error: _error,
   reset,
 }: {
   error: Error & { digest?: string };
@@ -21,7 +21,9 @@ export default function ContactError({
       </div>
 
       <div className="rounded-lg border-2 border-red-200 bg-red-50 p-6">
-        <h2 className="text-lg font-semibold text-red-900">エラーが発生しました</h2>
+        <h2 className="text-lg font-semibold text-red-900">
+          エラーが発生しました
+        </h2>
         <p className="mt-2 text-sm text-red-800">
           お問い合わせフォームの読み込み中に問題が発生しました。しばらくしてから再度お試しください。
         </p>

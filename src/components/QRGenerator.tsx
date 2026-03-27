@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import QRCode from "qrcode";
 import JSZip from "jszip";
+import Image from "next/image";
+import QRCode from "qrcode";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 
 const MAX_QR = 1000;
 type ErrorCorrectionLevel = "L" | "M" | "Q" | "H";
@@ -25,17 +26,21 @@ export function QRGenerator({
   inModal = false,
 }: QRGeneratorProps) {
   const columnCount = columnOrder?.length ?? data[0]?.length ?? 0;
-  const [selectedColumns, setSelectedColumns] = useState<Set<number>>(new Set([0]));
+  const [selectedColumns, setSelectedColumns] = useState<Set<number>>(
+    new Set([0]),
+  );
   const [size, setSize] = useState(200);
   const [separator, setSeparator] = useState("\n");
   const [fgColor, setFgColor] = useState("#000000");
   const [bgColor, setBgColor] = useState("#ffffff");
-  const [errorCorrection, setErrorCorrection] = useState<ErrorCorrectionLevel>("M");
+  const [errorCorrection, setErrorCorrection] =
+    useState<ErrorCorrectionLevel>("M");
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState<"qr" | "zip" | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
+  const uid = useId();
 
   const dataRows = useMemo(() => {
     const start = hasHeaderRow ? 1 : 0;
@@ -53,7 +58,8 @@ export function QRGenerator({
   const totalRowsBeforeLimit = useMemo(() => {
     const start = hasHeaderRow ? 1 : 0;
     if (filteredIndices && filteredIndices.length > 0) {
-      return filteredIndices.filter((i) => i >= start && i < data.length).length;
+      return filteredIndices.filter((i) => i >= start && i < data.length)
+        .length;
     }
     return data.length - start;
   }, [data, hasHeaderRow, filteredIndices]);
@@ -73,7 +79,7 @@ export function QRGenerator({
         })
         .join(separator);
     },
-    [selectedColumns, columnOrder, separator]
+    [selectedColumns, columnOrder, separator],
   );
 
   const toggleColumn = useCallback((displayIdx: number) => {
@@ -101,7 +107,7 @@ export function QRGenerator({
       type: "image/png" as const,
       errorCorrectionLevel: errorCorrection,
     }),
-    [size, fgColor, bgColor, errorCorrection]
+    [size, fgColor, bgColor, errorCorrection],
   );
 
   useEffect(() => {
@@ -124,7 +130,9 @@ export function QRGenerator({
     setGenerating(true);
     setProgress(0);
     setPhase("qr");
-    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await new Promise((r) =>
+      requestAnimationFrame(() => requestAnimationFrame(r)),
+    );
 
     try {
       const zip = new JSZip();
@@ -179,10 +187,10 @@ export function QRGenerator({
 
   const content = (
     <div className="flex flex-col gap-6">
-      <div>
-        <label className="mb-2 block text-xs font-medium text-stone-600">
+      <fieldset className="min-w-0 border-0 p-0">
+        <legend className="mb-2 block text-xs font-medium text-stone-600">
           含める列を選択
-        </label>
+        </legend>
         <div className="flex flex-wrap gap-3">
           {Array.from({ length: columnCount }).map((_, i) => {
             const actualCol = columnOrder?.[i] ?? i;
@@ -190,7 +198,7 @@ export function QRGenerator({
             const colLabel = label ? `${label} (Col${i + 1})` : `Col ${i + 1}`;
             return (
               <label
-                key={i}
+                key={actualCol}
                 className="flex cursor-pointer items-center gap-2 rounded-lg border border-stone-200 px-3 py-2 hover:bg-stone-50"
               >
                 <input
@@ -205,27 +213,45 @@ export function QRGenerator({
             );
           })}
         </div>
-      </div>
+      </fieldset>
 
       <div className="flex flex-wrap items-end gap-6">
         <div>
-          <label className="mb-1 block text-xs text-stone-600">サイズ (px)</label>
+          <label
+            htmlFor={`${uid}-qr-size`}
+            className="mb-1 block text-xs text-stone-600"
+          >
+            サイズ (px)
+          </label>
           <input
+            id={`${uid}-qr-size`}
             type="number"
             min={100}
             max={800}
             step={20}
             value={size}
-            onChange={(e) => setSize(Math.min(800, Math.max(100, Number(e.target.value) || 200)))}
+            onChange={(e) =>
+              setSize(
+                Math.min(800, Math.max(100, Number(e.target.value) || 200)),
+              )
+            }
             disabled={disabled}
             className="w-24 cursor-text rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-stone-600">誤り訂正レベル</label>
+          <label
+            htmlFor={`${uid}-qr-ec`}
+            className="mb-1 block text-xs text-stone-600"
+          >
+            誤り訂正レベル
+          </label>
           <select
+            id={`${uid}-qr-ec`}
             value={errorCorrection}
-            onChange={(e) => setErrorCorrection(e.target.value as ErrorCorrectionLevel)}
+            onChange={(e) =>
+              setErrorCorrection(e.target.value as ErrorCorrectionLevel)
+            }
             disabled={disabled}
             className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -236,9 +262,21 @@ export function QRGenerator({
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs text-stone-600">列の区切り文字</label>
+          <label
+            htmlFor={`${uid}-qr-sep`}
+            className="mb-1 block text-xs text-stone-600"
+          >
+            列の区切り文字
+          </label>
           <select
-            value={separator === "\n" ? "newline" : separator === "\t" ? "tab" : "comma"}
+            id={`${uid}-qr-sep`}
+            value={
+              separator === "\n"
+                ? "newline"
+                : separator === "\t"
+                  ? "tab"
+                  : "comma"
+            }
             onChange={(e) => {
               const v = e.target.value;
               setSeparator(v === "newline" ? "\n" : v === "tab" ? "\t" : ",");
@@ -254,14 +292,20 @@ export function QRGenerator({
       </div>
 
       <div>
-        <label className="mb-2 block text-xs font-medium text-stone-600">
+        <p className="mb-2 block text-xs font-medium text-stone-600">
           色（PNG出力・白黒推奨）
-        </label>
+        </p>
         <div className="flex flex-wrap items-end gap-4">
           <div>
-            <label className="mb-1 block text-xs text-stone-500">前景（モジュール色）</label>
+            <label
+              htmlFor={`${uid}-qr-fg-color`}
+              className="mb-1 block text-xs text-stone-500"
+            >
+              前景（モジュール色）
+            </label>
             <div className="flex items-center gap-2">
               <input
+                id={`${uid}-qr-fg-color`}
                 type="color"
                 value={fgColor}
                 onChange={(e) => setFgColor(e.target.value)}
@@ -269,18 +313,26 @@ export function QRGenerator({
                 className="h-9 w-14 cursor-pointer rounded border border-stone-300 bg-white p-0.5 disabled:cursor-not-allowed disabled:opacity-50"
               />
               <input
+                id={`${uid}-qr-fg-hex`}
                 type="text"
                 value={fgColor}
                 onChange={(e) => setFgColor(e.target.value)}
                 disabled={disabled}
+                aria-label="前景色（16進）"
                 className="w-20 cursor-text rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-xs text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-xs text-stone-500">背景</label>
+            <label
+              htmlFor={`${uid}-qr-bg-color`}
+              className="mb-1 block text-xs text-stone-500"
+            >
+              背景
+            </label>
             <div className="flex items-center gap-2">
               <input
+                id={`${uid}-qr-bg-color`}
                 type="color"
                 value={bgColor}
                 onChange={(e) => setBgColor(e.target.value)}
@@ -288,10 +340,12 @@ export function QRGenerator({
                 className="h-9 w-14 cursor-pointer rounded border border-stone-300 bg-white p-0.5 disabled:cursor-not-allowed disabled:opacity-50"
               />
               <input
+                id={`${uid}-qr-bg-hex`}
                 type="text"
                 value={bgColor}
                 onChange={(e) => setBgColor(e.target.value)}
                 disabled={disabled}
+                aria-label="背景色（16進）"
                 className="w-20 cursor-text rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-xs text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
@@ -301,25 +355,31 @@ export function QRGenerator({
 
       {totalRowsBeforeLimit > MAX_QR && (
         <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-          対象が{totalRowsBeforeLimit.toLocaleString()}件のため、先頭{MAX_QR.toLocaleString()}件のみ生成します。
+          対象が{totalRowsBeforeLimit.toLocaleString()}件のため、先頭
+          {MAX_QR.toLocaleString()}件のみ生成します。
         </p>
       )}
 
       <div>
-        <label className="mb-2 block text-xs font-medium text-stone-600">
+        <p
+          id={`${uid}-qr-preview-heading`}
+          className="mb-2 block text-xs font-medium text-stone-600"
+        >
           プレビュー（1行目のみ）
-        </label>
+        </p>
         <div className="flex flex-wrap items-start gap-4">
           <div className="flex flex-col items-center gap-2 rounded-lg border border-stone-200 bg-stone-50/50 p-4">
             {previewError ? (
               <p className="text-sm text-red-600">{previewError}</p>
             ) : previewDataUrl ? (
               <>
-                <img
+                <Image
                   src={previewDataUrl}
                   alt="QRプレビュー"
+                  width={Math.min(size, 200)}
+                  height={Math.min(size, 200)}
+                  unoptimized
                   className="max-w-[200px] border border-stone-200"
-                  style={{ width: Math.min(size, 200), height: Math.min(size, 200) }}
                 />
                 <span className="text-xs text-stone-500">
                   {size}×{size}px で出力
@@ -335,7 +395,9 @@ export function QRGenerator({
           </div>
           {previewText && (
             <div className="max-w-md rounded-lg border border-stone-200 bg-white p-3">
-              <p className="mb-1 text-xs font-medium text-stone-500">プレビュー対象テキスト</p>
+              <p className="mb-1 text-xs font-medium text-stone-500">
+                プレビュー対象テキスト
+              </p>
               <pre className="max-h-24 overflow-auto whitespace-pre-wrap break-all text-xs text-stone-700">
                 {previewText || "（空）"}
               </pre>
@@ -360,6 +422,7 @@ export function QRGenerator({
       )}
 
       <button
+        type="button"
         onClick={handleGenerate}
         disabled={
           disabled ||
@@ -369,7 +432,11 @@ export function QRGenerator({
         }
         className="cursor-pointer self-start rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {generating ? "生成中..." : dataRows.length > 1 ? "ZIPでダウンロード" : "PNGでダウンロード"}
+        {generating
+          ? "生成中..."
+          : dataRows.length > 1
+            ? "ZIPでダウンロード"
+            : "PNGでダウンロード"}
       </button>
     </div>
   );

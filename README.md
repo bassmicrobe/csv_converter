@@ -12,10 +12,25 @@
 
 ## セットアップ
 
+[pnpm](https://pnpm.io/) を利用します（Node.js に付属の Corepack で有効化できます）。
+
 ```bash
-npm install
-npm run dev
+corepack enable
+pnpm install
+pnpm dev
 ```
+
+### 品質チェック（Lint / 型検査 / テスト）
+
+```bash
+pnpm lint          # Biome（フォーマット含む静的解析）
+pnpm run typecheck # TypeScript（next プラグインなしの tsconfig で検査）
+pnpm test          # Vitest（ウォッチ）
+pnpm run test:run  # Vitest 一回実行
+pnpm run check     # 上記をまとめて（lint + typecheck + test:run）
+```
+
+コミット前に [Husky](https://typicode.github.io/husky/) + [lint-staged](https://github.com/lint-staged/lint-staged) でステージしたファイルに対して Biome が走ります。
 
 ## Basic認証（オプション）
 
@@ -31,14 +46,14 @@ BASIC_AUTH_PASSWORD=your_password
 ## ビルド
 
 ```bash
-npm run build
-npm start
+pnpm run build
+pnpm start
 ```
 
 ## Vercel デプロイ
 
 1. [Vercel](https://vercel.com) にリポジトリをインポート
-2. ビルドコマンド: `npm run build`
+2. ビルドコマンド: `pnpm run build`（Vercel はリポジトリ直下の `pnpm-lock.yaml` を検出すると pnpm を使います）
 3. ドメイン ezcsv.com をプロジェクトに紐付け
 
 ## ドキュメント
@@ -47,9 +62,10 @@ npm start
 
 ## 技術スタック
 
-- Next.js 16.1.6
+- Next.js 16.2.1
 - React 19
 - Tailwind CSS 4
+- Biome（Lint / Format）、Vitest、Husky、lint-staged
 - @tanstack/react-virtual
 - iconv-lite（Shift_JIS 対応）
 

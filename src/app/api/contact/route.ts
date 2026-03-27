@@ -1,32 +1,40 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 const sesClient = new SESClient({
   region: process.env.AWS_REGION || "us-east-1",
-  credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
-    ? {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      }
-    : undefined,
+  credentials:
+    process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+      ? {
+          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        }
+      : undefined,
 });
 
 const FROM_EMAIL = process.env.SES_FROM_EMAIL;
 const TO_EMAIL = process.env.SES_TO_EMAIL;
 
+const isProduction = process.env.NODE_ENV === "production";
+
 async function verifyTurnstile(token: string): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return true;
+  if (!secret) {
+    return !isProduction;
+  }
 
   try {
-    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        secret,
-        response: token,
-      }),
-    });
+    const res = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          secret,
+          response: token,
+        }),
+      },
+    );
     const data = await res.json();
     return data.success === true;
   } catch {
@@ -38,29 +46,61 @@ export async function POST(request: NextRequest) {
   if (!FROM_EMAIL || !TO_EMAIL) {
     return NextResponse.json(
       { error: "メール送信が設定されていません" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
   try {
     const formData = await request.formData();
-    const name = formData.get("name")?.toString();
-    const email = formData.get("email")?.toString();
-    const subject = formData.get("_subject")?.toString();
-    const message = formData.get("message")?.toString();
-    const turnstileToken = formData.get("cf-turnstile-response")?.toString();
+
+    // ハニーポット（ボットが埋めがち）。値があれば送信せず成功を装う
+    const trap = formData.get("_company_website")?.toString()?.trim();
+    if (trap) {
+      return NextResponse.json({ success: true });
+    }
+
+    const name = formData.get("name")?.toString()?.trim();
+    const email = formData.get("email")?.toString()?.trim();
+    const subject = formData.get("_subject")?.toString()?.trim();
+    const message = formData.get("message")?.toString()?.trim();
+    const turnstileToken = formData
+      .get("cf-turnstile-response")
+      ?.toString()
+      ?.trim();
 
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
         { error: "必須項目が入力されていません" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    if (turnstileToken && !(await verifyTurnstile(turnstileToken))) {
+    if (isProduction) {
+      if (!process.env.TURNSTILE_SECRET_KEY) {
+        return NextResponse.json(
+          { error: "サーバー設定が不完全です。管理者にお問い合わせください。" },
+          { status: 503 },
+        );
+      }
+      if (!turnstileToken) {
+        return NextResponse.json(
+          {
+            error:
+              "認証を完了してください。ページを再読み込みしてからお試しください。",
+          },
+          { status: 400 },
+        );
+      }
+      if (!(await verifyTurnstile(turnstileToken))) {
+        return NextResponse.json(
+          { error: "認証に失敗しました。再度お試しください。" },
+          { status: 400 },
+        );
+      }
+    } else if (turnstileToken && !(await verifyTurnstile(turnstileToken))) {
       return NextResponse.json(
         { error: "認証に失敗しました。再度お試しください。" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -117,37 +157,43 @@ ${message}
 ezcsv 運営チーム
 `;
 
-    const autoReplyCommand = new SendEmailCommand({
-      Source: FROM_EMAIL,
-      Destination: {
-        ToAddresses: [email],
-      },
-      Message: {
-        Subject: {
-          Data: `[ezcsv] お問い合わせを受け付けました`,
-          Charset: "UTF-8",
+    const autoReplyEnabled =
+      process.env.CONTACT_AUTOREPLY_ENABLED !== "false" &&
+      process.env.CONTACT_AUTOREPLY_ENABLED !== "0";
+
+    if (autoReplyEnabled) {
+      const autoReplyCommand = new SendEmailCommand({
+        Source: FROM_EMAIL,
+        Destination: {
+          ToAddresses: [email],
         },
-        Body: {
-          Text: {
-            Data: autoReplyBody,
+        Message: {
+          Subject: {
+            Data: `[ezcsv] お問い合わせを受け付けました`,
             Charset: "UTF-8",
           },
+          Body: {
+            Text: {
+              Data: autoReplyBody,
+              Charset: "UTF-8",
+            },
+          },
         },
-      },
-    });
-
-    // 両方のメールを送信
-    await Promise.all([
-      sesClient.send(adminCommand),
-      sesClient.send(autoReplyCommand),
-    ]);
+      });
+      await Promise.all([
+        sesClient.send(adminCommand),
+        sesClient.send(autoReplyCommand),
+      ]);
+    } else {
+      await sesClient.send(adminCommand);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("SES送信エラー:", error);
     return NextResponse.json(
       { error: "メール送信に失敗しました。しばらくしてからお試しください。" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

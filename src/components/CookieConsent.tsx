@@ -1,5 +1,6 @@
 "use client";
 
+import { Analytics } from "@vercel/analytics/next";
 import Link from "next/link";
 import {
   createContext,
@@ -8,7 +9,6 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Analytics } from "@vercel/analytics/next";
 
 const STORAGE_KEY = "ezcsv-cookie-consent";
 
@@ -21,7 +21,7 @@ interface CookieConsentContextValue {
 }
 
 const CookieConsentContext = createContext<CookieConsentContextValue | null>(
-  null
+  null,
 );
 
 function getStoredStatus(): ConsentStatus {
@@ -72,7 +72,9 @@ export function CookieConsentProvider({
     <CookieConsentContext.Provider value={{ status, accept, reject }}>
       {children}
       {status === "accepted" && <Analytics />}
-      {status === "pending" && <CookieConsentBanner onAccept={accept} onReject={reject} />}
+      {status === "pending" && (
+        <CookieConsentBanner onAccept={accept} onReject={reject} />
+      )}
     </CookieConsentContext.Provider>
   );
 }
@@ -92,7 +94,8 @@ function CookieConsentBanner({
     >
       <div className="mx-auto flex max-w-[1200px] flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <p className="text-sm text-stone-700">
-          本サイトではアクセス解析（Vercel Analytics）のためにデータを収集しています。
+          本サイトではアクセス解析（Vercel
+          Analytics）のためにデータを収集しています。
           <Link
             href="/privacy"
             className="ml-1 text-emerald-600 hover:underline"

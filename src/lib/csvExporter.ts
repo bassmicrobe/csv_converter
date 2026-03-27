@@ -3,10 +3,7 @@ import type { CsvOptions } from "./types";
 /**
  * CSVデータを指定形式で文字列に変換
  */
-export function exportCsv(
-  data: string[][],
-  options: CsvOptions
-): string {
+export function exportCsv(data: string[][], options: CsvOptions): string {
   const { delimiter, quoteChar, lineEnding } = options;
   const lineEnd = lineEnding === "CRLF" ? "\r\n" : "\n";
 
@@ -24,7 +21,7 @@ export function exportCsv(
           if (!needsQuote) return str;
           return `${quoteChar}${str.replace(/"/g, '""')}${quoteChar}`;
         })
-        .join(delimiter)
+        .join(delimiter),
     )
     .join(lineEnd);
 }

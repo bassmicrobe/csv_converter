@@ -3,13 +3,16 @@
 import Script from "next/script";
 import { useState } from "react";
 
-// Cloudflare テストキー（未設定時のフォールバック）
+// 開発時のみ Turnstile テストサイトキー（本番でフォールバックするとボットにも通りやすい）
 const TURNSTILE_TEST_KEY = "1x00000000000000000000AA";
 const TURNSTILE_SITE_KEY =
-  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || TURNSTILE_TEST_KEY;
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+  (process.env.NODE_ENV === "development" ? TURNSTILE_TEST_KEY : "");
 
 export function ContactForm() {
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [formKey, setFormKey] = useState(0);
 
@@ -40,14 +43,21 @@ export function ContactForm() {
         const data = await res.json().catch(() => ({}));
         setStatus("error");
         if (res.status === 404) {
-          setErrorMessage("API が見つかりません。ページを再読み込みしてください。");
+          setErrorMessage(
+            "API が見つかりません。ページを再読み込みしてください。",
+          );
         } else {
-          setErrorMessage(data.error || `送信に失敗しました（${res.status}）。しばらくしてからお試しください。`);
+          setErrorMessage(
+            data.error ||
+              `送信に失敗しました（${res.status}）。しばらくしてからお試しください。`,
+          );
         }
       }
     } catch (error) {
       setStatus("error");
-      setErrorMessage(`送信に失敗しました。ネットワーク接続を確認してください。${error instanceof Error ? ` (${error.message})` : ""}`);
+      setErrorMessage(
+        `送信に失敗しました。ネットワーク接続を確認してください。${error instanceof Error ? ` (${error.message})` : ""}`,
+      );
     }
   };
 
@@ -71,15 +81,26 @@ export function ContactForm() {
         <p className="mt-4 text-sm text-stone-500">
           フォームから直接送信するには、AWS SES の環境変数を設定してください。
           <br />
-          <code className="mx-1 rounded bg-stone-200 px-1">SES_FROM_EMAIL</code>、
-          <code className="mx-1 rounded bg-stone-200 px-1">SES_TO_EMAIL</code>、
-          <code className="mx-1 rounded bg-stone-200 px-1">AWS_REGION</code>、
-          <code className="mx-1 rounded bg-stone-200 px-1">AWS_ACCESS_KEY_ID</code>、
-          <code className="mx-1 rounded bg-stone-200 px-1">AWS_SECRET_ACCESS_KEY</code>
+          <code className="mx-1 rounded bg-stone-200 px-1">SES_FROM_EMAIL</code>
+          、<code className="mx-1 rounded bg-stone-200 px-1">SES_TO_EMAIL</code>
+          、<code className="mx-1 rounded bg-stone-200 px-1">AWS_REGION</code>、
+          <code className="mx-1 rounded bg-stone-200 px-1">
+            AWS_ACCESS_KEY_ID
+          </code>
+          、
+          <code className="mx-1 rounded bg-stone-200 px-1">
+            AWS_SECRET_ACCESS_KEY
+          </code>
           <br />
           ボット対策は Turnstile テストキーで動作します。本番用には
-          <code className="mx-1 rounded bg-stone-200 px-1">NEXT_PUBLIC_TURNSTILE_SITE_KEY</code> と
-          <code className="mx-1 rounded bg-stone-200 px-1">TURNSTILE_SECRET_KEY</code> を設定してください。
+          <code className="mx-1 rounded bg-stone-200 px-1">
+            NEXT_PUBLIC_TURNSTILE_SITE_KEY
+          </code>{" "}
+          と
+          <code className="mx-1 rounded bg-stone-200 px-1">
+            TURNSTILE_SECRET_KEY
+          </code>{" "}
+          を設定してください。
         </p>
       </div>
     );
@@ -94,8 +115,26 @@ export function ContactForm() {
         />
       )}
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* ハニーポット: 人間には非表示。ボットが値を入れたら API 側で送信しない */}
+        <div
+          className="absolute left-[-9999px] h-0 w-0 overflow-hidden"
+          aria-hidden="true"
+        >
+          <label htmlFor="_company_website">Website</label>
+          <input
+            id="_company_website"
+            name="_company_website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+          />
+        </div>
+
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-stone-700">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-stone-700"
+          >
             お名前 <span className="text-red-500">*</span>
           </label>
           <input
@@ -110,7 +149,10 @@ export function ContactForm() {
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-stone-700">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-stone-700"
+          >
             メールアドレス <span className="text-red-500">*</span>
           </label>
           <input
@@ -125,7 +167,10 @@ export function ContactForm() {
         </div>
 
         <div>
-          <label htmlFor="subject" className="block text-sm font-medium text-stone-700">
+          <label
+            htmlFor="subject"
+            className="block text-sm font-medium text-stone-700"
+          >
             件名 <span className="text-red-500">*</span>
           </label>
           <input
@@ -140,7 +185,10 @@ export function ContactForm() {
         </div>
 
         <div>
-          <label htmlFor="message" className="block text-sm font-medium text-stone-700">
+          <label
+            htmlFor="message"
+            className="block text-sm font-medium text-stone-700"
+          >
             メッセージ <span className="text-red-500">*</span>
           </label>
           <textarea

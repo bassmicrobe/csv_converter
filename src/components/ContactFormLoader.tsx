@@ -9,5 +9,5 @@ export const ContactForm = dynamic(
     loading: () => (
       <div className="mt-8 h-48 animate-pulse rounded-lg bg-stone-200" />
     ),
-  }
+  },
 );

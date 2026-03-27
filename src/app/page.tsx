@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { FileLoader } from "@/components/FileLoader";
-import { SearchFilter } from "@/components/SearchFilter";
+import { useCallback, useEffect, useState } from "react";
 import { CsvTable } from "@/components/CsvTable";
 import { ExportPanel } from "@/components/ExportPanel";
+import { FileLoader } from "@/components/FileLoader";
 import { Modal } from "@/components/Modal";
 import { QRGenerator } from "@/components/QRGenerator";
+import { SearchFilter } from "@/components/SearchFilter";
 import { useToast } from "@/components/Toast";
 import { useCsvEditor } from "@/hooks/useCsvEditor";
 
@@ -62,7 +62,9 @@ export default function Home() {
   const [searchColumn, setSearchColumn] = useState<number | null>(null);
   const [hasHeaderRow, setHasHeaderRow] = useState(false);
   const [sortColumn, setSortColumn] = useState<number | null>(null);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(
+    null,
+  );
   const [qrModalOpen, setQrModalOpen] = useState(false);
 
   const handleFilterChange = useCallback(
@@ -70,7 +72,7 @@ export default function Home() {
       setFilteredIndices(indices);
       setSearchColumn(column);
     },
-    []
+    [],
   );
 
   const hasData = data.length > 0;
@@ -144,8 +146,11 @@ export default function Home() {
 
             <div className="flex items-center justify-between gap-4">
               <p className="text-sm text-stone-600">
-                {(hasHeaderRow ? Math.max(0, rowCount - 1) : rowCount).toLocaleString()} 行（データ）
-                × {columnCount} 列
+                {(hasHeaderRow
+                  ? Math.max(0, rowCount - 1)
+                  : rowCount
+                ).toLocaleString()}{" "}
+                行（データ） × {columnCount} 列
                 {rowCount >= 50_000 && (
                   <span className="ml-2 text-red-500">
                     （上限に達しています）
@@ -239,35 +244,58 @@ export default function Home() {
           </>
         )}
 
-        <section className="mt-12 rounded-xl border border-stone-200 bg-white p-6" aria-labelledby="about-heading">
-          <h2 id="about-heading" className="mb-4 text-lg font-semibold text-stone-900">
+        <section
+          className="mt-12 rounded-xl border border-stone-200 bg-white p-6"
+          aria-labelledby="about-heading"
+        >
+          <h2
+            id="about-heading"
+            className="mb-4 text-lg font-semibold text-stone-900"
+          >
             ezcsvとは
           </h2>
           <p className="mb-4 text-stone-600">
             ezcsvは無料のオンラインCSV編集ツールです。ブラウザ上でCSV・TSVファイルを編集・変換でき、インストール不要で即座に利用できます。データは一切サーバーに送信されず、すべてブラウザ内で処理されるため、個人情報や機密データも安全に編集できます。UTF-8/Shift_JIS対応、最大5万行まで、検索・ソート・列の並び替え・PDF出力・QRコード生成などの機能を備えています。
           </p>
-          <h3 className="mb-2 text-base font-medium text-stone-800">よくある質問</h3>
+          <h3 className="mb-2 text-base font-medium text-stone-800">
+            よくある質問
+          </h3>
           <dl className="space-y-4">
             <div>
-              <dt className="font-medium text-stone-800">ezcsvは無料で使えますか？</dt>
-              <dd className="mt-1 text-sm text-stone-600">はい、完全無料です。登録やログインは不要です。</dd>
+              <dt className="font-medium text-stone-800">
+                ezcsvは無料で使えますか？
+              </dt>
+              <dd className="mt-1 text-sm text-stone-600">
+                はい、完全無料です。登録やログインは不要です。
+              </dd>
             </div>
             <div>
-              <dt className="font-medium text-stone-800">CSVデータはサーバーに送信されますか？</dt>
-              <dd className="mt-1 text-sm text-stone-600">いいえ、すべての処理はブラウザ内で完結します。データは外部に送信されません。</dd>
+              <dt className="font-medium text-stone-800">
+                CSVデータはサーバーに送信されますか？
+              </dt>
+              <dd className="mt-1 text-sm text-stone-600">
+                いいえ、すべての処理はブラウザ内で完結します。データは外部に送信されません。
+              </dd>
             </div>
             <div>
-              <dt className="font-medium text-stone-800">どのような形式のCSVに対応していますか？</dt>
-              <dd className="mt-1 text-sm text-stone-600">UTF-8・Shift_JIS、カンマ・タブ区切り、LF/CRLF改行に対応しています。読み込み時に自動判別されます。</dd>
+              <dt className="font-medium text-stone-800">
+                どのような形式のCSVに対応していますか？
+              </dt>
+              <dd className="mt-1 text-sm text-stone-600">
+                UTF-8・Shift_JIS、カンマ・タブ区切り、LF/CRLF改行に対応しています。読み込み時に自動判別されます。
+              </dd>
             </div>
             <div>
-              <dt className="font-medium text-stone-800">Excelで開けるCSVを出力できますか？</dt>
-              <dd className="mt-1 text-sm text-stone-600">はい、UTF-8またはShift_JISでエクスポートできます。Excelで開く場合はShift_JISを選択してください。</dd>
+              <dt className="font-medium text-stone-800">
+                Excelで開けるCSVを出力できますか？
+              </dt>
+              <dd className="mt-1 text-sm text-stone-600">
+                はい、UTF-8またはShift_JISでエクスポートできます。Excelで開く場合はShift_JISを選択してください。
+              </dd>
             </div>
           </dl>
         </section>
       </div>
-
     </main>
   );
 }
