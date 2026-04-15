@@ -1,6 +1,35 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { type NextRequest, NextResponse } from "next/server";
 
+// --- シンプルなインメモリ レート制限 ---
+// ※ 複数インスタンス環境（Vercel 本番）では Upstash Redis への移行を推奨
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1分
+const RATE_LIMIT_MAX = 5; // 1分あたり最大5回
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return true;
+  }
+  entry.count++;
+  return false;
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const INPUT_LIMITS = {
+  name: 100,
+  email: 254,
+  subject: 200,
+  message: 5000,
+} as const;
+
 const sesClient = new SESClient({
   region: process.env.AWS_REGION || "us-east-1",
   credentials:
@@ -50,6 +79,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // レート制限チェック
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (isRateLimited(ip)) {
+    return NextResponse.json(
+      { error: "リクエストが多すぎます。しばらくしてからお試しください。" },
+      { status: 429 },
+    );
+  }
+
   try {
     const formData = await request.formData();
 
@@ -71,6 +110,27 @@ export async function POST(request: NextRequest) {
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
         { error: "必須項目が入力されていません" },
+        { status: 400 },
+      );
+    }
+
+    // 入力最大長チェック
+    if (
+      name.length > INPUT_LIMITS.name ||
+      email.length > INPUT_LIMITS.email ||
+      subject.length > INPUT_LIMITS.subject ||
+      message.length > INPUT_LIMITS.message
+    ) {
+      return NextResponse.json(
+        { error: "入力値が長すぎます" },
+        { status: 400 },
+      );
+    }
+
+    // メールアドレス形式チェック
+    if (!EMAIL_REGEX.test(email)) {
+      return NextResponse.json(
+        { error: "メールアドレスの形式が正しくありません" },
         { status: 400 },
       );
     }
@@ -190,7 +250,10 @@ ezcsv 運営チーム
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("SES送信エラー:", error);
+    console.error(
+      "SES送信エラー:",
+      error instanceof Error ? error.message : "Unknown error",
+    );
     return NextResponse.json(
       { error: "メール送信に失敗しました。しばらくしてからお試しください。" },
       { status: 500 },

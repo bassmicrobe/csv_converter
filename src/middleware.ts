@@ -1,5 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+// タイミング攻撃対策: XOR ベース定数時間比較（Edge Runtime 対応）
+function timingSafeEqual(a: string, b: string): boolean {
+  const encoder = new TextEncoder();
+  const aBytes = encoder.encode(a);
+  const bBytes = encoder.encode(b);
+  if (aBytes.length !== bBytes.length) return false;
+  let result = 0;
+  for (let i = 0; i < aBytes.length; i++) {
+    result |= aBytes[i] ^ bBytes[i];
+  }
+  return result === 0;
+}
+
 export function middleware(request: NextRequest) {
   const enabled = process.env.BASIC_AUTH_ENABLED;
   if (enabled === "false" || enabled === "0") {
@@ -28,7 +41,11 @@ export function middleware(request: NextRequest) {
     const base64 = authHeader.slice(6);
     const decoded = atob(base64);
     const [authUser, authPass] = decoded.split(":", 2);
-    if (authUser === user && authPass === pass) {
+
+    if (
+      timingSafeEqual(authUser ?? "", user) &&
+      timingSafeEqual(authPass ?? "", pass)
+    ) {
       return NextResponse.next();
     }
   } catch {
