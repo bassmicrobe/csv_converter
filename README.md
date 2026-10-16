@@ -62,7 +62,7 @@ pnpm start
 
 ## 技術スタック
 
-- Next.js 16.2.1
+- Next.js 16.4.2
 - React 19
 - Tailwind CSS 4
 - Biome（Lint / Format）、Vitest、Husky、lint-staged
