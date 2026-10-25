@@ -8,6 +8,7 @@ const webApp = {
     "ezcsv オンラインCSV編集",
   ],
   url: "https://ezcsv.com",
+  image: "https://ezcsv.com/opengraph-image.png",
   description:
     "ezcsvは無料のオンラインCSV編集ツール。ブラウザだけでCSV・TSVを編集・変換。データはサーバーに送信されず完全にローカルで動作。UTF-8/Shift_JIS対応、5万行まで。",
   applicationCategory: "UtilitiesApplication",

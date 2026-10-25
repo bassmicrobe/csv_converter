@@ -1,0 +1,1 @@
+ezcsv - ブラウザだけで安全にCSV・TSVを編集。データ送信なし・無料・UTF-8 / Shift_JIS対応。

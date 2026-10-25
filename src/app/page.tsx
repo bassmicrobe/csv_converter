@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { CsvTable } from "@/components/CsvTable";
 import { ExportPanel } from "@/components/ExportPanel";
 import { FileLoader } from "@/components/FileLoader";
@@ -83,8 +84,8 @@ export default function Home() {
       aria-label="メインコンテンツ"
     >
       <header className="mb-10">
-        <h1 className="text-3xl font-bold tracking-tight text-stone-900">
-          ezcsv
+        <h1>
+          <BrandLogo className="h-24 w-auto" />
         </h1>
         <p className="mt-1 text-stone-600">
           無料のオンラインCSV編集ツール - ブラウザだけで安全に編集

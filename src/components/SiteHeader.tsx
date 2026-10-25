@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export function SiteHeader() {
   return (
@@ -6,9 +7,10 @@ export function SiteHeader() {
       <div className="mx-auto flex h-14 max-w-[1600px] items-center justify-between px-4 md:px-6">
         <Link
           href="/"
-          className="flex items-center gap-2 font-bold tracking-tight text-stone-900 transition hover:text-emerald-600"
+          aria-label="ezcsv ホーム"
+          className="flex items-center gap-3 rounded-sm transition hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-600"
         >
-          <span className="text-xl">ezcsv</span>
+          <BrandLogo className="h-12 w-auto" />
           <span className="hidden text-sm font-normal text-stone-500 sm:inline">
             ブラウザ完結のCSV編集
           </span>

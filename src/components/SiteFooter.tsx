@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export function SiteFooter() {
   const currentYear = new Date().getFullYear();
@@ -10,9 +11,10 @@ export function SiteFooter() {
           <div>
             <Link
               href="/"
-              className="text-lg font-bold text-stone-900 hover:text-emerald-600"
+              aria-label="ezcsv ホーム"
+              className="inline-flex rounded-sm transition hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-600"
             >
-              ezcsv
+              <BrandLogo className="h-16 w-auto" />
             </Link>
             <p className="mt-2 max-w-sm text-sm text-stone-600">
               秘匿情報・個人情報を含むCSVをサーバーに送信せず、ブラウザ上のみで安全に編集できます。データはサーバーに送信されません。

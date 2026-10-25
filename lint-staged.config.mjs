@@ -16,6 +16,6 @@ function shouldRunBiome(files) {
 export default {
   "*": (files) => {
     if (!shouldRunBiome(files)) return [];
-    return "pnpm exec biome check --write .";
+    return "corepack pnpm exec biome check --write .";
   },
 };
