@@ -7,24 +7,32 @@
 
 # ezcsv
 
-ブラウザだけで動く無料のCSV・TSV編集ツール。CSVデータをサーバーに送信せず、編集・変換・エクスポートできます。
+**ブラウザだけで動く無料のCSV・TSV編集ツール。CSVデータをサーバーに送信せず、編集・変換・エクスポートできます。**
 
 **[ezcsv.com を開く](https://ezcsv.com)**
 
-## 主な機能
+## 概要
 
-- **ブラウザ内でCSV処理** — 読み込んだCSVデータはサーバーに送信せず、LocalStorageなどにも保存しません。
-- **最大5万行** — 仮想スクロールで大きな表も編集できます。
-- **表の編集** — セル編集、行・列の追加／削除／クリア、列のドラッグ並び替え、Undo／Redoに対応。
-- **検索・整理** — 列を指定した検索・フィルタ、ソート、1行目のヘッダー扱いに対応。
-- **入出力設定** — UTF-8／Shift_JIS、カンマ／タブ、CRLF／LFに対応。読み込み時に自動判別し、出力時に変更できます。
-- **出力** — CSV・TSV・PDFの保存と、行データからのQRコード生成（最大1,000件、ZIP一括保存）に対応。
+CSV処理はブラウザ内で完結し、読み込んだデータはサーバーに送信せず、LocalStorageなどにも保存しません（Webフォントの取得、同意した場合のアクセス解析、お問い合わせ送信のみ外部通信を利用します）。
+
+- **ブラウザ内でCSV処理** — データを外部に送信しない設計。
+- **最大5万行** — 仮想スクロールで大きな表も編集可能。
+- **表の編集** — セル編集、行・列の追加／削除／クリア、列のドラッグ並び替え、Undo／Redo。
+- **検索・整理** — 列を指定した検索・フィルタ、ソート、1行目のヘッダー扱い。
+- **入出力設定** — UTF-8／Shift_JIS、カンマ／タブ、CRLF／LFに対応。読み込み時に自動判別し、出力時に変更可能。
+- **出力** — CSV・TSV・PDFの保存と、行データからのQRコード生成（最大1,000件、ZIP一括保存）。
 
 対応する入力ファイルは `.csv`・`.tsv`・`.txt` です。Excelブック（`.xlsx`）は、CSVに書き出してから読み込んでください。
 
-CSV処理はブラウザ内で完結します。Webフォントの取得、同意した場合のアクセス解析、お問い合わせ送信には外部通信を利用します。
+## 技術スタック
 
-## 開発環境
+- Next.js 16 / React 19 / TypeScript 5
+- Tailwind CSS 4 / @tanstack/react-virtual
+- iconv-lite / html2pdf.js / qrcode / JSZip
+- AWS SDK for SES / Cloudflare Turnstile / Vercel Analytics（同意時のみ）
+- Biome / Vitest / Husky / lint-staged / sharp（ブランド画像生成）
+
+## セットアップ
 
 Node.js 22.12以上と、`package.json` の `packageManager` で指定したpnpmを利用します。
 
@@ -47,48 +55,13 @@ corepack pnpm run check     # Lint・型検査・テストをまとめて実行
 corepack pnpm run build     # 本番ビルド
 ```
 
-コミット前にはHuskyとlint-stagedでBiomeが実行されます。チェックとGitフックはCorepack経由で、プロジェクトで指定したpnpmを使います。
+コミット前にはHuskyとlint-stagedでBiomeが実行されます。チェックとGitフックはCorepack経由で、プロジェクトで指定したpnpmを使います。テストツールの依存関係はVite 7.3.7を指定し、esbuildは脆弱性修正版の0.28.1以降を使うようpnpmのoverrideを設定しています。
 
-テストツールの依存関係はVite 7.3.7を指定しています。esbuildは脆弱性修正版の0.28.1以降を使うよう、pnpmのoverrideを設定しています。
+### 環境変数
 
-## ロゴ・favicon・OGP
+**Basic認証（任意）** — `BASIC_AUTH_USER` と `BASIC_AUTH_PASSWORD` を両方設定すると、サイトにBasic認証がかかります。`BASIC_AUTH_ENABLED=false` または `0` で無効化できます。
 
-提供されたSVGロゴは [`public/brand`](public/brand) に格納しています。
-
-| 用途                | 素材・生成先                                                                     |
-| ------------------- | -------------------------------------------------------------------------------- |
-| アプリ内のロゴ      | `public/brand/ezcsv-lockup-light.svg`（共通の `BrandLogo` コンポーネント）       |
-| README              | 明るい背景／暗い背景用の横組みロゴを自動切り替え                                 |
-| favicon             | `src/app/icon.svg`、`src/app/favicon.ico`（16／32／48px）                        |
-| Appleホーム画面     | `src/app/apple-icon.png`（180px）                                                |
-| Webアプリ用アイコン | `public/icons/icon-192.png`、`public/icons/icon-512.png`、`public/manifest.json` |
-| OGP・Xのカード      | `src/app/opengraph-image.png`（1200×630px）                                      |
-
-元のSVGを差し替えたら、次のコマンドで画像を再生成し、生成物もコミットしてください。ブランド画像の生成・配信には外部サービスへのアクセスは不要です。
-
-```bash
-corepack pnpm run assets:generate
-```
-
-OGPプレビュー:
-
-![ezcsvのOGPイメージ](src/app/opengraph-image.png)
-
-## 環境変数
-
-### Basic認証（任意）
-
-`BASIC_AUTH_USER` と `BASIC_AUTH_PASSWORD` を両方設定すると、サイトにBasic認証がかかります。`BASIC_AUTH_ENABLED=false` または `0` で無効化できます。
-
-```dotenv
-BASIC_AUTH_ENABLED=true
-BASIC_AUTH_USER=your_username
-BASIC_AUTH_PASSWORD=your_password
-```
-
-### お問い合わせフォーム
-
-お問い合わせのメール送信にはAWS SESを利用します。本番ではCloudflare Turnstileのサイトキーとシークレットも必要です。
+**お問い合わせフォーム** — メール送信にはAWS SESを利用します。本番ではCloudflare Turnstileのサイトキーとシークレットも必要です。
 
 | 環境変数                                                  | 内容                                                 |
 | --------------------------------------------------------- | ---------------------------------------------------- |
@@ -100,7 +73,7 @@ BASIC_AUTH_PASSWORD=your_password
 
 設定例は [`.env.example`](.env.example) を参照してください。認証情報はリポジトリにコミットしないでください。
 
-## ビルド・デプロイ
+### ビルド・デプロイ
 
 ```bash
 corepack pnpm run build
@@ -109,18 +82,17 @@ corepack pnpm start
 
 Vercelでは、このリポジトリをインポートしてNext.jsプロジェクトとして構成し、必要な環境変数を設定します。`pnpm-lock.yaml` と `packageManager` でpnpmのバージョンを固定しています。ビルドコマンドは `pnpm run build`、公開ドメインは `ezcsv.com` です。
 
-## 技術スタック
+## 構成
 
-- Next.js 16 / React 19 / TypeScript 5
-- Tailwind CSS 4 / @tanstack/react-virtual
-- iconv-lite / html2pdf.js / qrcode / JSZip
-- AWS SDK for SES / Cloudflare Turnstile / Vercel Analytics（同意時のみ）
-- Biome / Vitest / Husky / lint-staged / sharp（ブランド画像生成）
+ブランドロゴのSVGは [`public/brand`](public/brand) に格納しています。favicon（`src/app/icon.svg`・`src/app/favicon.ico`）、Appleホーム画面アイコン（`src/app/apple-icon.png`）、Webアプリ用アイコン（`public/icons/`）、OGP画像（`src/app/opengraph-image.png`）は、元のSVGを差し替えたあと次のコマンドで再生成し、生成物もコミットしてください。
+
+```bash
+corepack pnpm run assets:generate
+```
+
+詳細は [ブランド素材ガイド](docs/brand_assets.md) を参照してください。
 
 ## ドキュメント
 
 - [仕様書](docs/admin/ezcsv_仕様書.md) — 機能仕様、技術仕様、制約など
-
-## ライセンス
-
-MIT
+- [ブランド素材ガイド](docs/brand_assets.md) — ロゴ・favicon・OGPの素材一覧と再生成手順
