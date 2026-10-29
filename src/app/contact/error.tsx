@@ -14,7 +14,7 @@ export default function ContactError({
       <div className="mb-8">
         <Link
           href="/"
-          className="text-sm text-emerald-600 hover:text-emerald-700"
+          className="text-sm text-emerald-700 hover:text-emerald-800"
         >
           ← ezcsv トップへ
         </Link>
@@ -32,7 +32,7 @@ export default function ContactError({
             href="https://cybereye-tech.jp/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-emerald-600 hover:underline"
+            className="text-emerald-700 hover:underline"
           >
             運営会社のお問い合わせ窓口
           </a>
@@ -41,7 +41,7 @@ export default function ContactError({
         <button
           type="button"
           onClick={reset}
-          className="mt-6 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          className="mt-6 rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800"
         >
           再試行
         </button>

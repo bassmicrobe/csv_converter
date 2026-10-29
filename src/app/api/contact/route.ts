@@ -1,25 +1,16 @@
+import { isIP } from "node:net";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { type NextRequest, NextResponse } from "next/server";
+import {
+  ContactRateLimiter,
+  ContactRequestError,
+  contactText,
+  readContactForm,
+} from "@/lib/contactSecurity";
 
 // --- シンプルなインメモリ レート制限 ---
 // ※ 複数インスタンス環境（Vercel 本番）では Upstash Redis への移行を推奨
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1分
-const RATE_LIMIT_MAX = 5; // 1分あたり最大5回
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return false;
-  }
-  if (entry.count >= RATE_LIMIT_MAX) {
-    return true;
-  }
-  entry.count++;
-  return false;
-}
+const rateLimiter = new ContactRateLimiter();
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -46,7 +37,11 @@ const TO_EMAIL = process.env.SES_TO_EMAIL;
 
 const isProduction = process.env.NODE_ENV === "production";
 
-async function verifyTurnstile(token: string): Promise<boolean> {
+async function verifyTurnstile(
+  token: string,
+  expectedHostname: string,
+): Promise<boolean> {
+  if (token.length > 2048) return false;
   const secret = process.env.TURNSTILE_SECRET_KEY;
   if (!secret) {
     return !isProduction;
@@ -62,16 +57,28 @@ async function verifyTurnstile(token: string): Promise<boolean> {
           secret,
           response: token,
         }),
+        signal: AbortSignal.timeout(5000),
       },
     );
+    if (!res.ok) return false;
     const data = await res.json();
-    return data.success === true;
+    return (
+      data?.success === true &&
+      (!isProduction || data.hostname === expectedHostname)
+    );
   } catch {
     return false;
   }
 }
 
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get("origin");
+  if (origin && origin !== request.nextUrl.origin) {
+    return NextResponse.json(
+      { error: "このサイトから送信してください" },
+      { status: 403 },
+    );
+  }
   if (!FROM_EMAIL || !TO_EMAIL) {
     return NextResponse.json(
       { error: "メール送信が設定されていません" },
@@ -80,32 +87,31 @@ export async function POST(request: NextRequest) {
   }
 
   // レート制限チェック
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  if (isRateLimited(ip)) {
+  const forwardedIp =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "";
+  const ip = isIP(forwardedIp) ? forwardedIp : "unknown";
+  if (rateLimiter.isLimited(ip)) {
     return NextResponse.json(
       { error: "リクエストが多すぎます。しばらくしてからお試しください。" },
-      { status: 429 },
+      { status: 429, headers: { "Retry-After": "60" } },
     );
   }
 
   try {
-    const formData = await request.formData();
+    const formData = await readContactForm(request);
 
     // ハニーポット（ボットが埋めがち）。値があれば送信せず成功を装う
-    const trap = formData.get("_company_website")?.toString()?.trim();
+    const trap = contactText(formData, "_company_website");
     if (trap) {
       return NextResponse.json({ success: true });
     }
 
-    const name = formData.get("name")?.toString()?.trim();
-    const email = formData.get("email")?.toString()?.trim();
-    const subject = formData.get("_subject")?.toString()?.trim();
-    const message = formData.get("message")?.toString()?.trim();
-    const turnstileToken = formData
-      .get("cf-turnstile-response")
-      ?.toString()
-      ?.trim();
+    const name = contactText(formData, "name");
+    const email = contactText(formData, "email");
+    const subject = contactText(formData, "_subject");
+    const message = contactText(formData, "message");
+    const turnstileToken = contactText(formData, "cf-turnstile-response");
+    const expectedHostname = request.nextUrl.hostname;
 
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
@@ -151,13 +157,16 @@ export async function POST(request: NextRequest) {
           { status: 400 },
         );
       }
-      if (!(await verifyTurnstile(turnstileToken))) {
+      if (!(await verifyTurnstile(turnstileToken, expectedHostname))) {
         return NextResponse.json(
           { error: "認証に失敗しました。再度お試しください。" },
           { status: 400 },
         );
       }
-    } else if (turnstileToken && !(await verifyTurnstile(turnstileToken))) {
+    } else if (
+      turnstileToken &&
+      !(await verifyTurnstile(turnstileToken, expectedHostname))
+    ) {
       return NextResponse.json(
         { error: "認証に失敗しました。再度お試しください。" },
         { status: 400 },
@@ -250,6 +259,12 @@ ezcsv 運営チーム
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof ContactRequestError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status },
+      );
+    }
     console.error(
       "SES送信エラー:",
       error instanceof Error ? error.message : "Unknown error",

@@ -1,15 +1,27 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { CsvTable } from "@/components/CsvTable";
 import { ExportPanel } from "@/components/ExportPanel";
 import { FileLoader } from "@/components/FileLoader";
 import { Modal } from "@/components/Modal";
-import { QRGenerator } from "@/components/QRGenerator";
 import { SearchFilter } from "@/components/SearchFilter";
 import { useToast } from "@/components/Toast";
 import { useCsvEditor } from "@/hooks/useCsvEditor";
+
+const QRGenerator = dynamic(
+  () => import("@/components/QRGenerator").then((module) => module.QRGenerator),
+  {
+    ssr: false,
+    loading: () => (
+      <p role="status" className="text-sm text-stone-600">
+        QRコード生成機能を読み込み中...
+      </p>
+    ),
+  },
+);
 
 export default function Home() {
   const {
@@ -40,7 +52,15 @@ export default function Home() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "z") {
+      const target = e.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          target.closest("input, textarea, select, [role='textbox'], dialog"))
+      ) {
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
         e.preventDefault();
         if (e.shiftKey) {
           if (canRedo) {
@@ -76,7 +96,9 @@ export default function Home() {
     [],
   );
 
-  const hasData = data.length > 0;
+  const hasData = data.length > 0 && columnOrder.length > 0;
+  const hasEditor =
+    data.length > 0 || columnOrder.length > 0 || canUndo || canRedo;
 
   return (
     <main
@@ -92,10 +114,13 @@ export default function Home() {
         </p>
         <div className="mt-4 rounded-lg border-2 border-emerald-500/60 bg-emerald-50 px-4 py-3">
           <p className="text-lg font-bold text-emerald-700">
-            データはサーバーに送信されません
+            CSVデータはサーバーに送信されません
           </p>
-          <p className="mt-1 text-sm text-emerald-600">
-            すべての処理はブラウザ内で完結・外部への通信なし・LocalStorage等への保存も行いません
+          <p className="mt-1 text-sm text-emerald-700">
+            CSVの読み込み・編集・出力はブラウザ内で完結し、CSVデータをLocalStorage等に自動保存しません。
+          </p>
+          <p className="mt-1 text-xs text-emerald-800">
+            お問い合わせ送信・同意した場合のアクセス解析には外部通信を利用します。
           </p>
         </div>
       </header>
@@ -115,7 +140,7 @@ export default function Home() {
           disabled={false}
         />
 
-        {hasData && (
+        {hasEditor && (
           <>
             <div className="rounded-lg border border-stone-200 bg-stone-50/50 p-4">
               <label className="flex cursor-pointer items-start gap-3">
@@ -123,7 +148,7 @@ export default function Home() {
                   type="checkbox"
                   checked={hasHeaderRow}
                   onChange={(e) => setHasHeaderRow(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
+                  className="mt-0.5 h-4 w-4 rounded border-stone-300 text-emerald-700 focus:ring-emerald-500"
                 />
                 <div>
                   <span className="block font-medium text-stone-800">
@@ -145,7 +170,7 @@ export default function Home() {
               disabled={false}
             />
 
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm text-stone-600">
                 {(hasHeaderRow
                   ? Math.max(0, rowCount - 1)
@@ -275,7 +300,7 @@ export default function Home() {
                 CSVデータはサーバーに送信されますか？
               </dt>
               <dd className="mt-1 text-sm text-stone-600">
-                いいえ、すべての処理はブラウザ内で完結します。データは外部に送信されません。
+                いいえ、CSVの読み込み・編集・出力はブラウザ内で完結し、CSVデータを外部に送信しません。
               </dd>
             </div>
             <div>

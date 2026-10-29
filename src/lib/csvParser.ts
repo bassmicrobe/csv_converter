@@ -11,7 +11,7 @@ export interface ParseResult {
  */
 export function parseCsv(
   rawText: string,
-  options: Pick<CsvOptions, "delimiter" | "quoteChar">,
+  options: Pick<CsvOptions, "delimiter" | "quoteChar"> & { maxRows?: number },
 ): ParseResult {
   const { delimiter, quoteChar } = options;
   const rows: string[][] = [];
@@ -21,6 +21,12 @@ export function parseCsv(
   let i = 0;
   let currentLine = 1;
   let quoteStartLine = 0;
+  let hasQuotedCell = false;
+  const maxRows = options.maxRows ?? Number.POSITIVE_INFINITY;
+  const rowLimitError = (): ParseResult => ({
+    data: [],
+    error: `行数が上限（${maxRows.toLocaleString()}行）を超えています。処理負荷が高くなるため読み込みを中断しました。`,
+  });
 
   const pushCell = () => {
     currentRow.push(currentCell);
@@ -28,9 +34,12 @@ export function parseCsv(
   };
 
   const pushRow = () => {
+    if (rows.length >= maxRows) return false;
     pushCell();
     rows.push(currentRow);
     currentRow = [];
+    hasQuotedCell = false;
+    return true;
   };
 
   while (i < rawText.length) {
@@ -38,6 +47,7 @@ export function parseCsv(
     const nextChar = rawText[i + 1];
 
     if (quoteChar && char === quoteChar) {
+      hasQuotedCell = true;
       if (inQuotes) {
         if (nextChar === quoteChar) {
           currentCell += quoteChar;
@@ -54,10 +64,9 @@ export function parseCsv(
     }
 
     if (inQuotes) {
-      if (char === "\n" || char === "\r") {
-        currentCell += char;
-      } else {
-        currentCell += char;
+      currentCell += char;
+      if (char === "\r" || (char === "\n" && rawText[i - 1] !== "\r")) {
+        currentLine++;
       }
       i++;
       continue;
@@ -70,14 +79,14 @@ export function parseCsv(
     }
 
     if (char === "\n") {
-      pushRow();
+      if (!pushRow()) return rowLimitError();
       currentLine++;
       i++;
       continue;
     }
 
     if (char === "\r") {
-      pushRow();
+      if (!pushRow()) return rowLimitError();
       currentLine++;
       if (nextChar === "\n") {
         i += 2;
@@ -91,8 +100,8 @@ export function parseCsv(
     i++;
   }
 
-  if (currentCell || currentRow.length > 0) {
-    pushRow();
+  if (currentCell || currentRow.length > 0 || hasQuotedCell) {
+    if (!pushRow()) return rowLimitError();
   }
 
   if (inQuotes && quoteChar) {

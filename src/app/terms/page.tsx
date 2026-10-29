@@ -12,7 +12,7 @@ export default function TermsPage() {
       <div className="mb-8">
         <Link
           href="/"
-          className="text-sm text-emerald-600 hover:text-emerald-700"
+          className="text-sm text-emerald-700 hover:text-emerald-800"
         >
           ← ezcsv トップへ
         </Link>
@@ -88,7 +88,7 @@ export default function TermsPage() {
                 href="https://cybereye-tech.jp/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-emerald-600 hover:text-emerald-700"
+                className="text-emerald-700 hover:text-emerald-800"
               >
                 サイバーアイ・テクノロジー株式会社
               </a>
@@ -102,7 +102,7 @@ export default function TermsPage() {
                 href="https://cybereye-tech.jp/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-emerald-600 hover:text-emerald-700"
+                className="text-emerald-700 hover:text-emerald-800"
               >
                 https://cybereye-tech.jp/
               </a>
@@ -112,7 +112,7 @@ export default function TermsPage() {
       </div>
 
       <div className="mt-12">
-        <Link href="/" className="text-emerald-600 hover:text-emerald-700">
+        <Link href="/" className="text-emerald-700 hover:text-emerald-800">
           ← トップページに戻る
         </Link>
       </div>

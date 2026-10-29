@@ -1,0 +1,161 @@
+{
+  "checkedAt": "2026-10-29 23:02:45 JST",
+  "node": "v24.12.0",
+  "method": "HTML script src bytes after HTTP decoding; modern excludes nomodule. One local synthetic Node run, explicit GC included in history elapsed time; not browser CWV.",
+  "before": {
+    "status": 200,
+    "allScriptBytes": 1165649,
+    "modernScriptBytes": 1053055,
+    "googleFonts": true,
+    "assets": [
+      {
+        "path": "/_next/static/immutable/chunks/2tuh-038q5l3u.js",
+        "status": 200,
+        "bytes": 33886,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/immutable/chunks/38c_91wmcq0rb.js",
+        "status": 200,
+        "bytes": 229109,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/immutable/chunks/2ml0-hqw68wnm.js",
+        "status": 200,
+        "bytes": 163366,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/immutable/chunks/turbopack-1cvbnb3nlabgn.js",
+        "status": 200,
+        "bytes": 10030,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/immutable/chunks/006hm3_yw48uq.js",
+        "status": 200,
+        "bytes": 28125,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/immutable/chunks/3q1msrf10drkw.js",
+        "status": 200,
+        "bytes": 13829,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/immutable/chunks/0uh6871k2b_hv.js",
+        "status": 200,
+        "bytes": 224,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/immutable/chunks/0iz09ya4vog_c.js",
+        "status": 200,
+        "bytes": 567956,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/immutable/chunks/0c0hxoamwjsbw.js",
+        "status": 200,
+        "bytes": 112594,
+        "modern": false
+      },
+      {
+        "path": "/_next/static/immutable/chunks/2xawd0gee202g.js",
+        "status": 200,
+        "bytes": 6530,
+        "modern": true
+      }
+    ]
+  },
+  "after": {
+    "status": 200,
+    "allScriptBytes": 671317,
+    "modernScriptBytes": 558723,
+    "googleFonts": false,
+    "assets": [
+      {
+        "path": "/_next/static/chunks/3k7zd_30ntxcl.js",
+        "status": 200,
+        "bytes": 33838,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/chunks/12g_-fwuusfhv.js",
+        "status": 200,
+        "bytes": 228651,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/chunks/2i0j43ra6gdr5.js",
+        "status": 200,
+        "bytes": 163342,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/chunks/turbopack-3-ry682tkyiqk.js",
+        "status": 200,
+        "bytes": 10030,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/chunks/3ojdcbqj51mqq.js",
+        "status": 200,
+        "bytes": 28854,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/chunks/2ltsl94a8cnsj.js",
+        "status": 200,
+        "bytes": 13829,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/chunks/1am7f9v0ysyw1.js",
+        "status": 200,
+        "bytes": 5228,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/chunks/0lenmc1806uzt.js",
+        "status": 200,
+        "bytes": 68421,
+        "modern": true
+      },
+      {
+        "path": "/_next/static/chunks/0cz1d0mv5g_q7.js",
+        "status": 200,
+        "bytes": 112594,
+        "modern": false
+      },
+      {
+        "path": "/_next/static/chunks/0mrzlt8t5f-qb.js",
+        "status": 200,
+        "bytes": 6530,
+        "modern": true
+      }
+    ]
+  },
+  "modernReductionPercent": 46.9,
+  "history": {
+    "rows": 50000,
+    "columns": 20,
+    "edits": 30,
+    "legacy": {
+      "elapsedMs": 262.4,
+      "retainedMiB": 309
+    },
+    "shared": {
+      "elapsedMs": 11.7,
+      "retainedMiB": 11.5
+    }
+  },
+  "sort": {
+    "rows": 50000,
+    "legacyMs": 118.9,
+    "optimizedMs": 38.9,
+    "identical": true
+  }
+}

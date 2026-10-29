@@ -13,7 +13,7 @@ export default function PrivacyPage() {
       <div className="mb-8">
         <Link
           href="/"
-          className="text-sm text-emerald-600 hover:text-emerald-700"
+          className="text-sm text-emerald-700 hover:text-emerald-700"
         >
           ← ezcsv トップへ
         </Link>
@@ -22,7 +22,7 @@ export default function PrivacyPage() {
       <h1 className="text-2xl font-bold text-stone-900">
         プライバシーポリシー
       </h1>
-      <p className="mt-2 text-sm text-stone-500">最終更新日: 2025年2月</p>
+      <p className="mt-2 text-sm text-stone-500">最終更新日: 2026年10月29日</p>
 
       <div className="mt-8 space-y-8 text-stone-700">
         <section>
@@ -50,7 +50,12 @@ export default function PrivacyPage() {
             <li>
               <strong>アクセス解析（Vercel Analytics）</strong>
               <br />
-              ページの閲覧数、リファラー、デバイス種別など、匿名の利用状況データ。個人を特定する情報は含まれません。
+              同意した場合に限り、ページの閲覧数、リファラー、デバイス種別などの利用状況データを収集します。CSVファイルの内容は送信しません。
+            </li>
+            <li>
+              <strong>お問い合わせ</strong>
+              <br />
+              フォームに入力したお名前、メールアドレス、件名、本文を、お問い合わせへの対応と返信のために利用します。
             </li>
           </ul>
         </section>
@@ -61,7 +66,7 @@ export default function PrivacyPage() {
           </h2>
           <p className="mt-2 leading-relaxed">
             本サービスでは、アクセス解析（Vercel
-            Analytics）の利用について、初回アクセス時に同意の可否を確認するバナーを表示しています。「許可する」を選択した場合のみ解析が有効になります。本サービスは、CSVデータの保存や個人の識別のためにクッキーを使用しません。
+            Analytics）の利用について、初回アクセス時に同意の可否を確認するバナーを表示しています。「許可する」を選択した場合のみ解析が有効になります。同意・拒否の選択のみLocalStorageに保存します。フッターの「アクセス解析の設定」から選択を変更し、解析を無効にできます。CSVデータの保存にクッキーやLocalStorageは使用しません。
           </p>
         </section>
 
@@ -71,7 +76,7 @@ export default function PrivacyPage() {
           </h2>
           <p className="mt-2 leading-relaxed">
             本サービスは、利用者が読み込んだCSVデータをサーバーに保存しません。LocalStorage、SessionStorage、IndexedDB
-            等のローカルストレージにもデータを保存しません。データはブラウザのメモリ上でのみ保持され、ページを閉じると消去されます。
+            等のローカルストレージにもCSVデータを保存しません。CSVデータはブラウザのメモリ上でのみ保持され、ページの再読み込みや終了時に失われます。必要なデータはCSV等としてご自身で保存してください。アクセス解析への同意・拒否の選択は、CSVデータとは別にLocalStorageへ保存します。
           </p>
         </section>
 
@@ -81,7 +86,9 @@ export default function PrivacyPage() {
           </h2>
           <p className="mt-2 leading-relaxed">
             CSVデータはサーバーに送信されないため、第三者に提供されることはありません。アクセス解析データは、Vercel
-            のサービスを通じて収集されますが、個人を特定する情報は含まれません。
+            のサービスを通じて収集されます。お問い合わせ時には、迷惑送信対策にCloudflare
+            Turnstile、メール送信にAWS
+            SESを利用し、入力内容や送信に必要な情報を取り扱います。これらの処理のために外部通信が発生します。
           </p>
         </section>
 
@@ -102,7 +109,7 @@ export default function PrivacyPage() {
             プライバシーに関するお問い合わせは、
             <Link
               href="/contact"
-              className="text-emerald-600 hover:text-emerald-700"
+              className="text-emerald-700 hover:text-emerald-700"
             >
               お問い合わせフォーム
             </Link>
@@ -111,7 +118,7 @@ export default function PrivacyPage() {
               href="https://cybereye-tech.jp/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-emerald-600 hover:text-emerald-700"
+              className="text-emerald-700 hover:text-emerald-700"
             >
               サイバーアイ・テクノロジー株式会社
             </a>
@@ -121,7 +128,7 @@ export default function PrivacyPage() {
       </div>
 
       <div className="mt-12">
-        <Link href="/" className="text-emerald-600 hover:text-emerald-700">
+        <Link href="/" className="text-emerald-700 hover:text-emerald-700">
           ← トップページに戻る
         </Link>
       </div>

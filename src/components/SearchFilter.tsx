@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { filterRowIndices } from "@/lib/csvView";
 
 interface SearchFilterProps {
   data: string[][];
@@ -23,31 +24,16 @@ export function SearchFilter({
   const [searchText, setSearchText] = useState("");
 
   const searchStartRow = hasHeaderRow ? 1 : 0;
-  const searchDataRows = hasHeaderRow ? data.slice(1) : data;
+  const selectedColumn = Math.min(searchColumn, Math.max(0, columnCount - 1));
 
   const actualSearchCol = columnOrder
-    ? (columnOrder[Math.min(searchColumn, columnOrder.length - 1)] ??
-      searchColumn)
-    : searchColumn;
+    ? (columnOrder[selectedColumn] ?? selectedColumn)
+    : selectedColumn;
 
   const filteredIndices = useMemo(() => {
-    if (!searchText.trim()) return null;
     const col = Math.min(actualSearchCol, columnCount - 1);
-    if (col < 0) return null;
-    const lower = searchText.toLowerCase();
-    return searchDataRows
-      .map((row, i) => {
-        const cell = (row[col] ?? "").toLowerCase();
-        return cell.includes(lower) ? searchStartRow + i : -1;
-      })
-      .filter((i) => i >= 0);
-  }, [
-    searchDataRows,
-    actualSearchCol,
-    searchText,
-    columnCount,
-    searchStartRow,
-  ]);
+    return filterRowIndices(data, col, searchText, searchStartRow);
+  }, [data, actualSearchCol, searchText, columnCount, searchStartRow]);
 
   const headerLabels = useMemo(() => {
     if (!hasHeaderRow || !data[0]) return null;
@@ -64,9 +50,9 @@ export function SearchFilter({
   }, []);
 
   useEffect(() => {
-    const col = searchText.trim() ? searchColumn : null;
+    const col = searchText.trim() ? selectedColumn : null;
     onFilterChange(filteredIndices, col);
-  }, [filteredIndices, searchColumn, searchText, onFilterChange]);
+  }, [filteredIndices, selectedColumn, searchText, onFilterChange]);
 
   if (columnCount === 0) return null;
 
@@ -85,7 +71,7 @@ export function SearchFilter({
           </label>
           <select
             id="search-filter-column"
-            value={searchColumn}
+            value={selectedColumn}
             onChange={(e) => handleColumnChange(Number(e.target.value))}
             disabled={disabled}
             className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
@@ -120,7 +106,8 @@ export function SearchFilter({
         </div>
         {filteredIndices !== null && (
           <p className="text-sm text-stone-600">
-            {filteredIndices.length} 件表示（全 {searchDataRows.length} 件中）
+            {filteredIndices.length} 件表示（全{" "}
+            {Math.max(0, data.length - searchStartRow)} 件中）
           </p>
         )}
       </div>

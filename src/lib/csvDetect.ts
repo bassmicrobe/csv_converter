@@ -1,4 +1,3 @@
-import iconv from "iconv-lite";
 import type {
   Charset,
   CsvOptions,
@@ -19,13 +18,18 @@ export async function detectAndReadCsv(file: File): Promise<DetectResult> {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = new Uint8Array(arrayBuffer);
 
-  const charset = detectCharset(buffer);
+  let charset: Charset = "UTF-8";
   let text: string;
   try {
-    text =
-      charset === "Shift_JIS"
-        ? iconv.decode(buffer as Buffer, "shiftjis")
-        : new TextDecoder("utf-8").decode(buffer);
+    // Fatal decoding distinguishes invalid UTF-8 from a valid U+FFFD character
+    // and lets us reuse the decoded text instead of decoding the whole file twice.
+    try {
+      text = new TextDecoder("utf-8", { fatal: true }).decode(buffer);
+    } catch {
+      charset = "Shift_JIS";
+      const { default: iconv } = await import("iconv-lite");
+      text = iconv.decode(buffer as Buffer, "shiftjis");
+    }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     throw new Error(
@@ -50,26 +54,6 @@ export async function detectAndReadCsv(file: File): Promise<DetectResult> {
   };
 }
 
-function detectCharset(buffer: Uint8Array): Charset {
-  // BOM チェック
-  if (
-    buffer.length >= 3 &&
-    buffer[0] === 0xef &&
-    buffer[1] === 0xbb &&
-    buffer[2] === 0xbf
-  ) {
-    return "UTF-8";
-  }
-
-  // UTF-8 でデコードして Replacement Character が含まれるかチェック
-  const utf8Text = new TextDecoder("utf-8", { fatal: false }).decode(buffer);
-  if (!utf8Text.includes("\ufffd")) {
-    return "UTF-8";
-  }
-
-  return "Shift_JIS";
-}
-
 function detectLineEnding(buffer: Uint8Array): LineEnding {
   let crlfCount = 0;
   let lfCount = 0;
@@ -87,7 +71,7 @@ function detectLineEnding(buffer: Uint8Array): LineEnding {
 }
 
 function detectDelimiter(text: string): Delimiter {
-  const lines = text.split(/\r\n|\r|\n/).slice(0, 10);
+  const lines = text.split(/\r\n|\r|\n/, 10);
   let commaScore = 0;
   let tabScore = 0;
   let prevCommaCount = -1;

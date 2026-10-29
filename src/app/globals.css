@@ -2,7 +2,7 @@
 
 /* html2canvas が lab/oklch 非対応のため、使用する色を hex で上書き */
 @theme {
-  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: system-ui, "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
 
   --color-stone-50: #fafaf9;
   --color-stone-100: #f5f5f4;
@@ -56,4 +56,9 @@
 /* Tailwind preflight の color-mix(in oklab, ...) を上書き（html2canvas 非対応のため） */
 ::placeholder {
   color: rgba(0, 0, 0, 0.5);
+}
+
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #047857;
+  outline-offset: 3px;
 }

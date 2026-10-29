@@ -17,20 +17,33 @@ export function FileLoader({
 }: FileLoaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [inputError, setInputError] = useState<string | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const input = e.currentTarget;
+    setInputError(null);
     setLoading(true);
-    await onLoad(file);
-    setLoading(false);
-    e.target.value = "";
+    try {
+      await onLoad(file);
+    } catch {
+      setInputError(
+        "ファイルを読み込めませんでした。内容を確認して、もう一度選択してください。",
+      );
+    } finally {
+      setLoading(false);
+      input.value = "";
+    }
   };
 
   const triggerSelect = () => inputRef.current?.click();
 
   return (
-    <section className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+    <section
+      aria-busy={loading}
+      className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm"
+    >
       <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-emerald-700">
         CSV読み込み
       </h2>
@@ -40,15 +53,17 @@ export function FileLoader({
           type="file"
           accept=".csv,.tsv,.txt"
           onChange={handleFileChange}
+          aria-label="読み込むCSV・TSVファイル"
+          disabled={disabled || loading}
           className="hidden"
         />
         <button
           type="button"
           onClick={triggerSelect}
           disabled={disabled || loading}
-          className="cursor-pointer rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-md transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-h-11 cursor-pointer rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-md transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           style={{
-            background: "linear-gradient(to right, #10b981, #059669, #0d9488)",
+            background: "linear-gradient(to right, #047857, #065f46)",
           }}
         >
           {loading ? "読み込み中..." : "ファイルを選択"}
@@ -56,8 +71,8 @@ export function FileLoader({
         <button
           type="button"
           onClick={onCreateNew}
-          disabled={disabled || !onCreateNew}
-          className="cursor-pointer rounded-lg border border-stone-300 bg-white px-5 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={disabled || loading || !onCreateNew}
+          className="min-h-11 cursor-pointer rounded-lg border border-stone-300 bg-white px-5 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           新たに作成
         </button>
@@ -65,13 +80,13 @@ export function FileLoader({
           文字コード・区切り文字などは自動判別されます（エクスポート時に変更可能）
         </span>
       </div>
-      {loadError && (
+      {(inputError || loadError) && (
         <div
           className="mt-3 rounded-lg border border-red-200 bg-red-50 p-4"
           role="alert"
         >
           <p className="whitespace-pre-line text-sm text-red-800">
-            {loadError}
+            {inputError || loadError}
           </p>
         </div>
       )}

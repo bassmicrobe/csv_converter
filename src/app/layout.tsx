@@ -84,22 +84,22 @@ export default function RootLayout({
   return (
     <html lang="ja" suppressHydrationWarning>
       <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap"
-          rel="stylesheet"
-        />
         <JsonLd />
       </head>
       <body className="antialiased bg-stone-50 text-stone-900 min-h-screen">
+        <a
+          href="#main-content"
+          className="sr-only fixed left-4 top-2 z-[100] rounded-md bg-white px-4 py-3 font-medium text-emerald-800 shadow-lg focus:not-sr-only focus:outline-2 focus:outline-emerald-700"
+        >
+          本文へスキップ
+        </a>
         <ToastProvider>
           <CookieConsentProvider>
             <div className="flex min-h-screen flex-col">
               <SiteHeader />
-              <div className="flex-1">{children}</div>
+              <div id="main-content" tabIndex={-1} className="flex-1">
+                {children}
+              </div>
               <SiteFooter />
             </div>
           </CookieConsentProvider>

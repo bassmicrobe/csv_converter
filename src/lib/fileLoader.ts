@@ -1,4 +1,3 @@
-import iconv from "iconv-lite";
 import type { Charset } from "./types";
 
 /**
@@ -11,6 +10,7 @@ export async function readFileAsText(
   const arrayBuffer = await file.arrayBuffer();
   const buffer = new Uint8Array(arrayBuffer);
   if (charset === "Shift_JIS") {
+    const { default: iconv } = await import("iconv-lite");
     return iconv.decode(buffer as Buffer, "shiftjis");
   }
   return new TextDecoder("utf-8").decode(arrayBuffer);

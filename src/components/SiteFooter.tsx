@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/BrandLogo";
+import { CookiePreferencesButton } from "@/components/CookieConsent";
 
 export function SiteFooter() {
   const currentYear = new Date().getFullYear();
@@ -22,7 +23,7 @@ export function SiteFooter() {
           </div>
           <div className="flex flex-col gap-4 md:flex-row md:gap-8">
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-500">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-600">
                 特徴
               </h3>
               <ul className="mt-2 space-y-2 text-sm text-stone-600">
@@ -33,13 +34,13 @@ export function SiteFooter() {
               </ul>
             </div>
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-500">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-600">
                 セキュリティ
               </h3>
               <ul className="mt-2 space-y-2 text-sm text-stone-600">
-                <li>サーバー送信なし</li>
-                <li>外部通信なし</li>
-                <li>ローカル保存なし</li>
+                <li>CSVデータの送信なし</li>
+                <li>CSV処理はブラウザ内</li>
+                <li>CSVデータの自動保存なし</li>
               </ul>
             </div>
           </div>
@@ -48,32 +49,33 @@ export function SiteFooter() {
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <Link
               href="/contact"
-              className="text-sm text-stone-500 hover:text-emerald-600"
+              className="text-sm text-stone-600 hover:text-emerald-700"
             >
               お問い合わせ
             </Link>
             <Link
               href="/terms"
-              className="text-sm text-stone-500 hover:text-emerald-600"
+              className="text-sm text-stone-600 hover:text-emerald-700"
             >
               利用規約
             </Link>
             <Link
               href="/privacy"
-              className="text-sm text-stone-500 hover:text-emerald-600"
+              className="text-sm text-stone-600 hover:text-emerald-700"
             >
               プライバシーポリシー
             </Link>
+            <CookiePreferencesButton />
             <a
               href="https://cybereye-tech.jp/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-stone-500 hover:text-emerald-600"
+              className="text-sm text-stone-600 hover:text-emerald-700"
             >
               運営会社
             </a>
           </div>
-          <p className="text-sm text-stone-500">
+          <p className="text-sm text-stone-600">
             © {currentYear} ezcsv — 秘匿情報・個人情報を含むCSVを安全に編集
           </p>
         </div>

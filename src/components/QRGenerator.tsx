@@ -3,9 +3,17 @@
 import JSZip from "jszip";
 import Image from "next/image";
 import QRCode from "qrcode";
-import { useCallback, useEffect, useId, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { MAX_QR, selectQrRows } from "./qrRows";
 
-const MAX_QR = 1000;
+const HEX_COLOR = /^#[\da-f]{6}$/i;
 type ErrorCorrectionLevel = "L" | "M" | "Q" | "H";
 
 interface QRGeneratorProps {
@@ -40,29 +48,23 @@ export function QRGenerator({
   const [phase, setPhase] = useState<"qr" | "zip" | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+  const generationId = useRef(0);
   const uid = useId();
+  const validColors = HEX_COLOR.test(fgColor) && HEX_COLOR.test(bgColor);
 
-  const dataRows = useMemo(() => {
-    const start = hasHeaderRow ? 1 : 0;
-    let rows: string[][];
-    if (filteredIndices && filteredIndices.length > 0) {
-      rows = filteredIndices
-        .filter((i) => i >= start && i < data.length)
-        .map((i) => data[i]);
-    } else {
-      rows = data.slice(start);
-    }
-    return rows.slice(0, MAX_QR);
-  }, [data, hasHeaderRow, filteredIndices]);
+  const { rows: dataRows, totalRows: totalRowsBeforeLimit } = useMemo(
+    () => selectQrRows(data, hasHeaderRow, filteredIndices),
+    [data, hasHeaderRow, filteredIndices],
+  );
 
-  const totalRowsBeforeLimit = useMemo(() => {
-    const start = hasHeaderRow ? 1 : 0;
-    if (filteredIndices && filteredIndices.length > 0) {
-      return filteredIndices.filter((i) => i >= start && i < data.length)
-        .length;
-    }
-    return data.length - start;
-  }, [data, hasHeaderRow, filteredIndices]);
+  useEffect(
+    () => () => {
+      generationId.current++;
+    },
+    [],
+  );
 
   const headerLabels = useMemo(() => {
     if (!hasHeaderRow || !data[0]) return null;
@@ -111,22 +113,51 @@ export function QRGenerator({
   );
 
   useEffect(() => {
+    let cancelled = false;
+    setPreviewDataUrl(null);
+    setPreviewLoading(false);
+    if (!validColors) {
+      setPreviewError("色は #000000 のような6桁の16進数で入力してください。");
+      return;
+    }
     if (selectedColumns.size === 0 || previewText === "") {
-      setPreviewDataUrl(null);
       setPreviewError(null);
       return;
     }
     setPreviewError(null);
+    setPreviewLoading(true);
     QRCode.toDataURL(previewText, {
       ...qrOptions,
       width: Math.min(size, 512),
     })
-      .then(setPreviewDataUrl)
-      .catch((e) => setPreviewError(String(e)));
-  }, [previewText, size, selectedColumns.size, qrOptions]);
+      .then((url) => {
+        if (!cancelled) setPreviewDataUrl(url);
+      })
+      .catch(() => {
+        if (!cancelled)
+          setPreviewError(
+            "QRコードを生成できません。含める列や文字数を減らすか、誤り訂正レベルを下げてください。",
+          );
+      })
+      .finally(() => {
+        if (!cancelled) setPreviewLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [previewText, size, selectedColumns.size, qrOptions, validColors]);
 
   const handleGenerate = useCallback(async () => {
-    if (selectedColumns.size === 0 || dataRows.length === 0) return;
+    if (
+      !validColors ||
+      generating ||
+      selectedColumns.size === 0 ||
+      dataRows.length === 0
+    )
+      return;
+    const runId = ++generationId.current;
+    const isCurrent = () => generationId.current === runId;
+    setGenerationError(null);
     setGenerating(true);
     setProgress(0);
     setPhase("qr");
@@ -138,8 +169,14 @@ export function QRGenerator({
       const zip = new JSZip();
       const total = dataRows.length;
       let done = 0;
+      let generated = 0;
+      let singleDataUrl: string | null = null;
 
       for (let i = 0; i < total; i++) {
+        if (!isCurrent()) return;
+        if (i % 10 === 0)
+          await new Promise((resolve) => requestAnimationFrame(resolve));
+        if (!isCurrent()) return;
         const row = dataRows[i];
         const text = getRowText(row);
         if (!text.trim()) {
@@ -148,6 +185,9 @@ export function QRGenerator({
           continue;
         }
         const dataUrl = await QRCode.toDataURL(text, qrOptions);
+        if (!isCurrent()) return;
+        singleDataUrl = dataUrl;
+        generated++;
         const base64 = dataUrl.replace(/^data:image\/png;base64,/, "");
         const filename = `qr_${String(i + 1).padStart(String(total).length, "0")}.png`;
         zip.file(filename, base64, { base64: true });
@@ -155,33 +195,55 @@ export function QRGenerator({
         setProgress(Math.round((done / total) * 100));
       }
 
-      if (total === 1 && dataRows[0]) {
-        const text = getRowText(dataRows[0]);
-        if (text.trim()) {
-          const blob = await QRCode.toDataURL(text, qrOptions);
-          const a = document.createElement("a");
-          a.href = blob;
-          a.download = "qr_01.png";
-          a.click();
-        }
+      if (generated === 0) {
+        setGenerationError(
+          "選択した列のデータがすべて空です。列や対象行を確認してください。",
+        );
+        return;
+      }
+      if (total === 1 && singleDataUrl) {
+        const a = document.createElement("a");
+        a.href = singleDataUrl;
+        a.download = "qr_01.png";
+        a.click();
       } else {
         setPhase("zip");
-        setProgress(95);
+        setProgress(0);
         await new Promise((r) => requestAnimationFrame(r));
-        const zipBlob = await zip.generateAsync({ type: "blob" });
+        const zipBlob = await zip.generateAsync(
+          { type: "blob" },
+          ({ percent }) => {
+            if (isCurrent()) setProgress(Math.round(percent));
+          },
+        );
+        if (!isCurrent()) return;
         const url = URL.createObjectURL(zipBlob);
         const a = document.createElement("a");
         a.href = url;
         a.download = `qr_codes_${new Date().toISOString().slice(0, 10)}.zip`;
         a.click();
-        URL.revokeObjectURL(url);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
+    } catch {
+      if (isCurrent())
+        setGenerationError(
+          "QRコードを生成できませんでした。含める列や文字数を減らすか、誤り訂正レベルを下げて再度お試しください。",
+        );
     } finally {
-      setGenerating(false);
-      setProgress(0);
-      setPhase(null);
+      if (isCurrent()) {
+        setGenerating(false);
+        setProgress(0);
+        setPhase(null);
+      }
     }
-  }, [selectedColumns.size, dataRows, getRowText, qrOptions]);
+  }, [
+    selectedColumns.size,
+    dataRows,
+    getRowText,
+    qrOptions,
+    validColors,
+    generating,
+  ]);
 
   if (columnCount === 0) return null;
 
@@ -205,7 +267,7 @@ export function QRGenerator({
                   type="checkbox"
                   checked={selectedColumns.has(i)}
                   onChange={() => toggleColumn(i)}
-                  disabled={disabled}
+                  disabled={disabled || generating}
                   className="h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
                 />
                 <span className="text-sm text-stone-800">{colLabel}</span>
@@ -235,7 +297,7 @@ export function QRGenerator({
                 Math.min(800, Math.max(100, Number(e.target.value) || 200)),
               )
             }
-            disabled={disabled}
+            disabled={disabled || generating}
             className="w-24 cursor-text rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
@@ -252,7 +314,7 @@ export function QRGenerator({
             onChange={(e) =>
               setErrorCorrection(e.target.value as ErrorCorrectionLevel)
             }
-            disabled={disabled}
+            disabled={disabled || generating}
             className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <option value="L">L（約7%復元可能）</option>
@@ -281,7 +343,7 @@ export function QRGenerator({
               const v = e.target.value;
               setSeparator(v === "newline" ? "\n" : v === "tab" ? "\t" : ",");
             }}
-            disabled={disabled}
+            disabled={disabled || generating}
             className="cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <option value="newline">改行</option>
@@ -307,9 +369,9 @@ export function QRGenerator({
               <input
                 id={`${uid}-qr-fg-color`}
                 type="color"
-                value={fgColor}
+                value={HEX_COLOR.test(fgColor) ? fgColor : "#000000"}
                 onChange={(e) => setFgColor(e.target.value)}
-                disabled={disabled}
+                disabled={disabled || generating}
                 className="h-9 w-14 cursor-pointer rounded border border-stone-300 bg-white p-0.5 disabled:cursor-not-allowed disabled:opacity-50"
               />
               <input
@@ -317,8 +379,9 @@ export function QRGenerator({
                 type="text"
                 value={fgColor}
                 onChange={(e) => setFgColor(e.target.value)}
-                disabled={disabled}
+                disabled={disabled || generating}
                 aria-label="前景色（16進）"
+                aria-invalid={!HEX_COLOR.test(fgColor)}
                 className="w-20 cursor-text rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-xs text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
@@ -334,9 +397,9 @@ export function QRGenerator({
               <input
                 id={`${uid}-qr-bg-color`}
                 type="color"
-                value={bgColor}
+                value={HEX_COLOR.test(bgColor) ? bgColor : "#ffffff"}
                 onChange={(e) => setBgColor(e.target.value)}
-                disabled={disabled}
+                disabled={disabled || generating}
                 className="h-9 w-14 cursor-pointer rounded border border-stone-300 bg-white p-0.5 disabled:cursor-not-allowed disabled:opacity-50"
               />
               <input
@@ -344,8 +407,9 @@ export function QRGenerator({
                 type="text"
                 value={bgColor}
                 onChange={(e) => setBgColor(e.target.value)}
-                disabled={disabled}
+                disabled={disabled || generating}
                 aria-label="背景色（16進）"
+                aria-invalid={!HEX_COLOR.test(bgColor)}
                 className="w-20 cursor-text rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-xs text-stone-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
@@ -370,7 +434,13 @@ export function QRGenerator({
         <div className="flex flex-wrap items-start gap-4">
           <div className="flex flex-col items-center gap-2 rounded-lg border border-stone-200 bg-stone-50/50 p-4">
             {previewError ? (
-              <p className="text-sm text-red-600">{previewError}</p>
+              <p role="alert" className="text-sm text-red-700">
+                {previewError}
+              </p>
+            ) : previewLoading ? (
+              <p role="status" className="text-sm text-stone-600">
+                プレビューを生成中...
+              </p>
             ) : previewDataUrl ? (
               <>
                 <Image
@@ -412,13 +482,26 @@ export function QRGenerator({
             <span>{phase === "zip" ? "ZIP作成中..." : "QR生成中..."}</span>
             <span>{progress}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200">
+          <div
+            role="progressbar"
+            aria-label={phase === "zip" ? "ZIP作成" : "QRコード生成"}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progress}
+            className="h-2 w-full overflow-hidden rounded-full bg-stone-200"
+          >
             <div
               className="h-full rounded-full bg-emerald-500 transition-all duration-150"
               style={{ width: `${progress}%` }}
             />
           </div>
         </div>
+      )}
+
+      {generationError && (
+        <p role="alert" className="text-sm text-red-700">
+          {generationError}
+        </p>
       )}
 
       <button
@@ -428,9 +511,10 @@ export function QRGenerator({
           disabled ||
           selectedColumns.size === 0 ||
           dataRows.length === 0 ||
+          !validColors ||
           generating
         }
-        className="cursor-pointer self-start rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+        className="min-h-11 cursor-pointer self-start rounded-lg bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {generating
           ? "生成中..."
