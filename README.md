@@ -67,6 +67,8 @@ corepack pnpm run build     # 本番ビルド
 
 **お問い合わせフォーム** — メール送信にはAWS SESを利用します。本番ではCloudflare Turnstileのサイトキーとシークレットも必要です。
 
+Turnstileのscriptは `next/script`（async）で読み込むため、`turnstile.ready()` は使わず、読み込み完了後に直接 `render` します（`ready()` は async のscriptでは例外になり、お問い合わせページがエラー表示になります）。
+
 お問い合わせのリクエスト本文は64KiBまでです。Turnstileは送信先のホスト名も検証します。レート制限はインスタンス単位のため、本番で全インスタンスに共通する制限が必要な場合は共有ストレージやWAFを併用してください。
 
 | 環境変数                                                  | 内容                                                 |

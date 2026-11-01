@@ -10,7 +10,6 @@ const TURNSTILE_SITE_KEY =
   (process.env.NODE_ENV === "development" ? TURNSTILE_TEST_KEY : "");
 
 interface TurnstileApi {
-  ready: (callback: () => void) => void;
   render: (
     container: HTMLElement,
     options: {
@@ -64,9 +63,9 @@ export function ContactForm() {
     const api = getTurnstile();
     if (!api) return;
     let active = true;
-    api.ready(() => {
-      if (!active || !widgetContainer.current || widgetId.current !== null)
-        return;
+    // next/script は async で読み込むため turnstile.ready() は使えない（例外になる）。
+    // onReady（読み込み完了後）にこの effect が走るので、そのまま render する。
+    if (widgetContainer.current && widgetId.current === null) {
       try {
         const id = api.render(widgetContainer.current, {
           sitekey: TURNSTILE_SITE_KEY,
@@ -101,7 +100,7 @@ export function ContactForm() {
           "認証を表示できませんでした。ページを再読み込みしてください。",
         );
       }
-    });
+    }
     return () => {
       active = false;
       if (widgetId.current !== null) api.remove(widgetId.current);
