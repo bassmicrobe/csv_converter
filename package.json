@@ -20,9 +20,9 @@
   "dependencies": {
     "@aws-sdk/client-ses": "^3.1164.0",
     "@tanstack/react-virtual": "^3.14.26",
-    "@vercel/analytics": "^1.6.1",
+    "@vercel/analytics": "^2.0.1",
     "html2pdf.js": "^0.14.0",
-    "iconv-lite": "^0.6.3",
+    "iconv-lite": "^0.7.3",
     "jszip": "^3.10.2",
     "next": "16.4.5",
     "qrcode": "^1.5.4",
@@ -47,12 +47,12 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "husky": "^9.1.7",
-    "lint-staged": "^15.5.2",
+    "lint-staged": "^17.6.0",
     "postcss": "^8.5.32",
     "sharp": "^0.35.5",
     "tailwindcss": "^4.3.5",
-    "typescript": "^5.9.3",
-    "vite": "7.3.7",
-    "vitest": "^4.1.12"
+    "typescript": "^7.0.2",
+    "vite": "8.3.6",
+    "vitest": "^5.1.0"
   }
 }

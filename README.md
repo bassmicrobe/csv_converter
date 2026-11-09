@@ -28,7 +28,7 @@ PDFはブラウザの描画・メモリ上限を考慮し、500行・10,000セ�
 
 ## 技術スタック
 
-- Next.js 16 / React 19 / TypeScript 5
+- Next.js 16 / React 19 / TypeScript 7
 - Tailwind CSS 4 / @tanstack/react-virtual
 - iconv-lite / html2pdf.js / qrcode / JSZip
 - AWS SDK for SES / Cloudflare Turnstile / Vercel Analytics（同意時のみ）
@@ -36,7 +36,7 @@ PDFはブラウザの描画・メモリ上限を考慮し、500行・10,000セ�
 
 ## セットアップ
 
-Node.js 22.12以上と、`package.json` の `packageManager` で指定したpnpmを利用します。
+Node.js 22.22.1以上と、`package.json` の `packageManager` で指定したpnpmを利用します。
 
 ```bash
 corepack enable
@@ -57,7 +57,7 @@ corepack pnpm run check     # Lint・型検査・テストをまとめて実行
 corepack pnpm run build     # 本番ビルド
 ```
 
-コミット前にはHuskyとlint-stagedでBiomeが実行されます。チェックとGitフックはCorepack経由で、プロジェクトで指定したpnpmを使います。テストツールの依存関係はVite 7.3.7を指定し、esbuildは脆弱性修正版の0.28.1以降を使うようpnpmのoverrideを設定しています。
+コミット前にはHuskyとlint-stagedでBiomeが実行されます。チェックとGitフックはCorepack経由で、プロジェクトで指定したpnpmを使います。テストツールの依存関係はVite 8.3.6を指定し、esbuildは脆弱性修正版の0.28.1以降を使うようpnpmのoverrideを設定しています。TypeScript 7にはJavaScriptのコンパイラAPIがないため、`next build` の型チェックはNext.jsの既定どおり `tsc` コマンドで行います（`experimental.useTypeScriptCli` を `false` にしないでください）。Node.js 22.22.1以上はlint-staged 17の要件です。
 
 ### 環境変数
 
