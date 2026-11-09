@@ -5,6 +5,13 @@
   </picture>
 </p>
 
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,nodejs,pnpm,vitest,vercel,aws,cloudflare&perline=12" alt="Next.js, React, TypeScript, Tailwind CSS, Node.js, pnpm, Vitest, Vercel, AWS, Cloudflare" height="40" />
+</p>
+<p align="center">
+  <img src="https://img.shields.io/badge/Biome-60A5FA?style=flat-square&logo=biome&logoColor=white" alt="Biome" />
+</p>
+
 # ezcsv
 
 **ブラウザだけで動く無料のCSV・TSV編集ツール。CSVデータをサーバーに送信せず、編集・変換・エクスポートできます。**
